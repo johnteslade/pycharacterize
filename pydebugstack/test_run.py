@@ -22,7 +22,7 @@ def manipulate_class():
     out = test_obj.equal()
     print out
 
-    test_obj.inc()
+    test_obj.inc(3)
     out = test_obj.equal()
     print out    
 
