@@ -2,14 +2,12 @@ import bdb
 import sys
 import linecache
 import test_pdb
-
-from mytest import MyTest
-
+import mytest
 
 
 def manipulate_class():
 
-    test_obj = MyTest()
+    test_obj = mytest.MyTest()
 
     test_obj.add(4)
     out = test_obj.get()
