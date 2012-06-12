@@ -27,7 +27,9 @@ def manipulate_class():
 if __name__ == "__main__":
 
     pdb_obj = test_pdb.TestPdb()
-    
+   
+    pdb_obj.set_class_to_watch("mytest.MyTest")
+
     pdb_obj.runcall(manipulate_class)
 
     print

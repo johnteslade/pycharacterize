@@ -206,10 +206,12 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
 
     # General interaction function
 
+    def set_class_to_watch(self, class_name):
+        """ Sets the class name to watch for - as a string """
+        self.class_of_interest = class_name
 
     def interaction(self, frame, traceback, func_call=False, func_return=False):
         
-        class_of_interest = "mytest.MyTest"
 
         # TODO ensure we don't capture calls that original from within the class
         # use the call entry/exit to determine this - if we have an outstanding call, then another call should be ignore
@@ -234,7 +236,7 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
            
             # Look for the class
             if 'self' in local_vars:
-                if str(local_vars['self'].__class__) == class_of_interest:
+                if str(local_vars['self'].__class__) == self.class_of_interest:
                     print "THIs is the class"
 
                     inputs = local_vars.copy()
