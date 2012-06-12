@@ -24,21 +24,6 @@ def manipulate_class():
     out = test_obj.equal()
     print out    
 
-def  autogen_test_code():
-    """ Copy this in from the code """
-
-    obj_var = mytest.MyTest()
-    obj_var.add(item=4)
-    ret = obj_var.get()
-    assert ret == [4]
-    obj_var.equal()
-    obj_var.inc(val=1)
-    ret = obj_var.equal()
-    assert ret == True
-    obj_var.inc(val=3)
-    obj_var.equal()
-        
-
 
 if __name__ == "__main__":
 
@@ -56,15 +41,14 @@ if __name__ == "__main__":
     
     print
 
-    pdb_obj.output_test_code()
-
-
+    test_code = pdb_obj.output_test_code()
+    print test_code
 
     print
     print "!!!!!!!!!!!!!!!!!!! RUNNING THE AUTOGEN ----------------"
     print
 
-    autogen_test_code()
+    exec(test_code)
 
     print "------ DONe "
 

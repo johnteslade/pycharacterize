@@ -259,14 +259,24 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
 
         code_out = []
 
+        code_out.append("""print "Starting execution of autogen test harness for {}" """.format(self.class_of_interest))
+        code_out.append("")
+
         for call in self.call_trace:
             if call['func'] == "__init__":
-                print "obj_var = {}({})".format(self.class_of_interest, self.format_input_text(call['inputs']))
-            elif call['return']:
-                print "ret = obj_var.{}({})".format(call['func'], self.format_input_text(call['inputs']))
-                print "assert ret == {}".format(call['return'])
+                code_out.append("obj_var = {}({})".format(self.class_of_interest, self.format_input_text(call['inputs'])))
+            elif call['return'] != None:
+                code_out.append("ret = obj_var.{}({})".format(call['func'], self.format_input_text(call['inputs'])))
+                code_out.append("assert ret == {}".format(call['return']))
             else:
-                print "obj_var.{}({})".format(call['func'], self.format_input_text(call['inputs']))
+                code_out.append("obj_var.{}({})".format(call['func'], self.format_input_text(call['inputs'])))
+            
+            code_out.append("")
+       
+        code_out.append("""print "Done with execution of autogen test harness for {}" """.format(self.class_of_interest))
+        code_out.append("") 
+
+        return "\n".join(code_out)
 
 
     def format_input_text(self, inputs):
