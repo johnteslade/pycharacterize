@@ -254,7 +254,24 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
         print "!!! stepping"
         self.forget()
 
+    
+    def output_test_code(self):
 
+        code_out = []
+
+        for call in self.call_trace:
+            if call['func'] == "__init__":
+                print "obj_var = {}({})".format(self.class_of_interest, self.format_input_text(call['inputs']))
+            elif call['return']:
+                print "ret = obj_var.{}({})".format(call['func'], self.format_input_text(call['inputs']))
+                print "assert ret == {}".format(call['return'])
+            else:
+                print "obj_var.{}({})".format(call['func'], self.format_input_text(call['inputs']))
+
+
+    def format_input_text(self, inputs):
+        
+        return ", ".join([ "{}={}".format(k, v) for (k, v) in inputs.items() ])
         
 
 
