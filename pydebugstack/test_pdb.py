@@ -13,7 +13,7 @@ import os
 import re
 import pprint
 import traceback
-
+import inspect
 
 class Restart(Exception):
     """Causes a debugger to be restarted for the debugged python program."""
@@ -104,6 +104,8 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
         self.commands_bnum = None # The breakpoint number for which we are
                                   # defining a list
 
+        self.call_trace = []
+
     def reset(self):
         bdb.Bdb.reset(self)
         self.forget()
@@ -145,7 +147,7 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
             return
         if self.stop_here(frame):
             print >>self.stdout, '--Call--'
-            self.interaction(frame, None)
+            self.interaction(frame, None, func_call=True)
 
     def user_line(self, frame):
         """This function is called when we stop or break at this line."""
@@ -187,7 +189,7 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
             return
         frame.f_locals['__return__'] = return_value
         print >>self.stdout, '--Return--'
-        self.interaction(frame, None)
+        self.interaction(frame, None, func_return=True)
 
     def user_exception(self, frame, exc_info):
         """This function is called if an exception occurs,
@@ -204,11 +206,55 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
 
     # General interaction function
 
-    def interaction(self, frame, traceback):
-        self.setup(frame, traceback)
-        self.print_stack_entry(self.stack[self.curindex])
-        self.cmdloop()
+
+    def interaction(self, frame, traceback, func_call=False, func_return=False):
+        
+        class_of_interest = "mytest.MyTest"
+
+        # TODO ensure we don't capture calls that original from within the class
+        # use the call entry/exit to determine this - if we have an outstanding call, then another call should be ignore
+
+        if func_return:
+            print
+            print "--------------"
+
+            print "-- RETURN"
+
+            self.setup(frame, traceback)
+            self.print_stack_entry(self.stack[self.curindex])
+           
+            print "Func = {}".format(self.stack[self.curindex][0].f_code.co_name)
+
+
+            (args, varargs, keywords, local_vars) = inspect.getargvalues(frame)  
+            print "a = {}".format(args)
+            print "v = {}".format(varargs)
+            print "k = {}".format(keywords)
+            print "l = {}".format(local_vars)
+           
+            # Look for the class
+            if 'self' in local_vars:
+                if str(local_vars['self'].__class__) == class_of_interest:
+                    print "THIs is the class"
+
+                    inputs = local_vars.copy()
+                    del inputs['self']
+                    del inputs['__return__']
+
+                    self.call_trace.append({
+                        'func': self.stack[self.curindex][0].f_code.co_name, 
+                        'return': local_vars['__return__'],
+                        'inputs': inputs,
+                    })
+        
+        # Carry on the execution
+        self.do_step(None)
+        print "!!! stepping"
         self.forget()
+
+
+        
+
 
     def displayhook(self, obj):
         """Custom displayhook for the exec in default(), which prevents

@@ -28,8 +28,15 @@ def manipulate_class():
 
 if __name__ == "__main__":
 
-    test_pdb.TestPdb().runcall(manipulate_class)
+    pdb_obj = test_pdb.TestPdb()
+    
+    pdb_obj.runcall(manipulate_class)
 
+    print
+    print "!!!!!!!!!!!!!!!!!!!----------------"
+    print
+
+    print pdb_obj.call_trace
 
 #    bdb_obj = bdb.Bdb()
 #    
