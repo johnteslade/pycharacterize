@@ -227,6 +227,23 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
 
         return attr_out
 
+    def changes_between_dict(self, old, new):
+        """ finds the differences in the dicts and returns the changes requried to old to get to new """
+
+        # TODO utility 
+
+        changes_to_new = {}
+
+        for key in new.keys():
+            if key in old:
+                if old[key] != new[key]:
+                    changes_to_new[key] = new[key]
+            else:
+                changes_to_new[key] = new[key]
+        
+        return changes_to_new
+
+
     last_val_obj = None
 
     def interaction(self, frame, traceback, func_call=False, func_return=False):
@@ -255,19 +272,20 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
             if str(local_vars['self'].__class__) == self.class_of_interest:
                 print "THIs is the class"
 
+                # Detect if there have been changes to the attributes between the call
                 if func_call:
 
                     new_val_obj = self.create_obj_attr_dict(local_vars['self'])
                     if (self.last_val_obj != None) and (self.last_val_obj != new_val_obj):
-                        print "!!!!! OBJ attributes changed before call"
-                        
                         self.call_trace.append({
                             'type': 'attr_change',
-                            'vals': new_val_obj,
+                            'vals': self.changes_between_dict(self.last_val_obj, new_val_obj),
                         })
 
+                # Save the details of the function call
                 if func_return:
-
+                   
+                    # Get the actual params passed in
                     inputs = local_vars.copy()
                     del inputs['self']
                     del inputs['__return__']
