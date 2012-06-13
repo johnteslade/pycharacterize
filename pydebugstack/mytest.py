@@ -45,6 +45,7 @@ class MyTest(MyTestBase):
     def equal(self):
         return self.b == self.c
 
+
 class MyTest2(MyTestBase):
     """ Class that has no main constructor """
 
@@ -62,6 +63,13 @@ class MyTest2(MyTestBase):
 
     def equal(self):
         return True
+
+
+class MyTest3(MyTest):
+    """ Class that has a parent """
+
+    def inc(self, val):
+        self.b += (val * 100)
 
 
 def manipulate_class(class_in):
@@ -118,6 +126,10 @@ class Test_test_Pdb(unittest.TestCase):
     def test_MyTest2(self):
 
         self.manipulate_given_class(MyTest2, "MyTest2")
+
+    def test_MyTest3(self):
+
+        self.manipulate_given_class(MyTest3, "MyTest3")
 
 if __name__ == '__main__':
     
