@@ -12,9 +12,12 @@ class MyTest:
 	def get(self):
 		return self.a
 	
-	def inc(self, val=1):
+	def inc(self, val):
 		self.b += val
-	
+    
+	def inc_by_1(self):
+		self.inc(1)
+
 	def equal(self):
 		return self.b == self.c
 

@@ -18,7 +18,7 @@ def manipulate_class():
    
     test_obj.c = 3
 
-    test_obj.inc()
+    test_obj.inc_by_1()
     out = test_obj.equal()
     print out
 
@@ -26,8 +26,9 @@ def manipulate_class():
     out = test_obj.equal()
     print out    
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
+    
     pdb_obj = test_pdb.TestPdb()
    
     pdb_obj.set_class_to_watch("mytest.MyTest")
