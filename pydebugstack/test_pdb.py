@@ -309,8 +309,8 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
                     else:
                         print "!!!!!!!! internal function call so ignoring - {}".format(self.stack[self.curindex][0].f_code.co_name)
        
-            # Save current state of object attributes
-            self.last_val_obj = self.create_obj_attr_dict(local_vars['self'])
+                # Save current state of object attributes
+                self.last_val_obj = self.create_obj_attr_dict(local_vars['self'])
 
         # Carry on the execution
         self.do_step(None)
