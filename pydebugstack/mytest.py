@@ -44,9 +44,23 @@ class MyTest(MyTestBase):
     
 	def inc_by_1(self):
 		self.inc(1)
+class MyTest2(MyTestBase):
+    """ Class that has no main constructor """
 
-	def equal(self):
-		return self.b == self.c
+    def add(self, item):
+        pass
+
+    def get(self):
+        return 1
+    
+    def inc(self, val):
+        return 99 + val
+    
+    def inc_by_1(self):
+        return self.inc(1)
+
+    def equal(self):
+        return True
 
 
 def manipulate_class(class_in):
@@ -90,6 +104,7 @@ class Test_test_Pdb(unittest.TestCase):
 
         # Check we have some test code output
         test_code = pdb_obj.output_test_code()
+        logging.debug(test_code)
         self.assertTrue(test_code > 0)
 
         # Execute the code - this will raise exceptions if wrong
@@ -98,7 +113,10 @@ class Test_test_Pdb(unittest.TestCase):
     def test_MyTest(self):
 
         self.manipulate_given_class(MyTest, "MyTest")
+    
+    def test_MyTest2(self):
 
+        self.manipulate_given_class(MyTest2, "MyTest2")
 
 if __name__ == '__main__':
     
