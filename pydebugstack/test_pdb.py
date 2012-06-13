@@ -276,13 +276,17 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
        
         # Look for the class
         if 'self' in local_vars:
+       
+            class_name = local_vars['self'].__class__.__module__ + "." + local_vars['self'].__class__.__name__ 
+
+            logging.debug("Class = {}, Func = {}".format(class_name, self.stack[self.curindex][0].f_code.co_name))
 
             # Save all functions we encounter
             if func_call:
-                self.all_calls[str(local_vars['self'].__class__)][self.stack[self.curindex][0].f_code.co_name] += 1
-                self.class_counts[str(local_vars['self'].__class__)] += 1
+                self.all_calls[class_name][self.stack[self.curindex][0].f_code.co_name] += 1
+                self.class_counts[class_name] += 1
 
-            if self.class_of_interest != None and str(local_vars['self'].__class__) == self.class_of_interest:
+            if self.class_of_interest != None and class_name == self.class_of_interest:
 
                 if func_call:
 
