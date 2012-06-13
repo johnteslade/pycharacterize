@@ -341,6 +341,12 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
         code_out.append("""print "Starting execution of autogen test harness for {}" """.format(self.class_of_interest))
         code_out.append("")
 
+        # Create obj if we have no explict __init__call
+        if len(filter(lambda x: x['type'] == 'func_call' and x['func'] == "__init__", self.call_trace)) == 0:
+            code_out.append("# Object initialiser - no actual function")
+            code_out.append("obj_var = {}()".format(self.class_of_interest))
+            code_out.append("")
+
         for call in self.call_trace:
             if call['type'] == "attr_change":
                     code_out.append("########### attr change")
