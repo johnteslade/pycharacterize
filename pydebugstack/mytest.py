@@ -1,5 +1,26 @@
 
-class MyTest:
+class MyTestBase:
+
+	def __init__(self):
+		raise NotImplementedError
+
+	def add(self, item):
+		raise NotImplementedError
+
+	def get(self):
+		raise NotImplementedError
+	
+	def inc(self, val):
+		raise NotImplementedError
+    
+	def inc_by_1(self):
+		raise NotImplementedError
+
+	def equal(self):
+		raise NotImplementedError
+
+
+class MyTest(MyTestBase):
 
 	def __init__(self):
 		self.a = []
