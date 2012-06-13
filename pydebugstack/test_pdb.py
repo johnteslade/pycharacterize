@@ -286,8 +286,10 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
                 self.all_calls[class_name][self.stack[self.curindex][0].f_code.co_name] += 1
                 self.class_counts[class_name] += 1
 
-            if self.class_of_interest != None and class_name == self.class_of_interest:
-
+            # Class we are interested in? 
+            # Sometimes the intested class with be prefixed with __main__ depending on the calling env
+            if self.class_of_interest != None and (class_name == self.class_of_interest or class_name == "__main__." + self.class_of_interest):
+            
                 if func_call:
 
                     # Save the current call stack just within the object
