@@ -245,7 +245,8 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
 
 
     last_val_obj = None
-
+    call_stack = []
+    
     def interaction(self, frame, traceback, func_call=False, func_return=False):
 
         # TODO ensure we don't capture calls that original from within the class
@@ -256,25 +257,29 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
 
         print "-- RETURN"
 
+        # TODO setup does something import and also prints
         self.setup(frame, traceback)
         self.print_stack_entry(self.stack[self.curindex])
        
         print "Func = {}".format(self.stack[self.curindex][0].f_code.co_name)
 
         (args, varargs, keywords, local_vars) = inspect.getargvalues(frame)  
-        print "a = {}".format(args)
-        print "v = {}".format(varargs)
-        print "k = {}".format(keywords)
-        print "l = {}".format(local_vars)
+        #print "a = {}".format(args)
+        #print "v = {}".format(varargs)
+        #print "k = {}".format(keywords)
+        #print "l = {}".format(local_vars)
        
         # Look for the class
         if 'self' in local_vars:
             if str(local_vars['self'].__class__) == self.class_of_interest:
                 print "THIs is the class"
 
-                # Detect if there have been changes to the attributes between the call
                 if func_call:
 
+                    # Save the current call stack just within the object
+                    self.call_stack.append(self.stack[self.curindex][0].f_code.co_name)
+
+                    # Detect if there have been changes to the attributes between the call
                     new_val_obj = self.create_obj_attr_dict(local_vars['self'])
                     if (self.last_val_obj != None) and (self.last_val_obj != new_val_obj):
                         self.call_trace.append({
@@ -284,25 +289,34 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
 
                 # Save the details of the function call
                 if func_return:
-                   
-                    # Get the actual params passed in
-                    inputs = local_vars.copy()
-                    del inputs['self']
-                    del inputs['__return__']
+                 
+                    # Take this func now off the stack
+                    return_func = self.call_stack.pop()
+                    assert (return_func  == self.stack[self.curindex][0].f_code.co_name)
 
-                    self.call_trace.append({
-                        'type': 'func_call',
-                        'func': self.stack[self.curindex][0].f_code.co_name, 
-                        'return': local_vars['__return__'],
-                        'inputs': inputs,
-                    })
+                    # If we have a call stack then this was a call originiating inside the object so ignore it
+                    if len(self.call_stack) == 0:
+                    
+                        # Get the actual params passed in
+                        inputs = local_vars.copy()
+                        del inputs['self']
+                        del inputs['__return__']
+
+                        self.call_trace.append({
+                            'type': 'func_call',
+                            'func': self.stack[self.curindex][0].f_code.co_name, 
+                            'return': local_vars['__return__'],
+                            'inputs': inputs,
+                        })
+
+                    else:
+                        print "!!!!!!!! internal function call so ignoring - {}".format(self.stack[self.curindex][0].f_code.co_name)
        
             # Save current state of object attributes
             self.last_val_obj = self.create_obj_attr_dict(local_vars['self'])
 
         # Carry on the execution
         self.do_step(None)
-        print "!!! stepping"
         self.forget()
 
     
