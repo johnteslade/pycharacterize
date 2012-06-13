@@ -105,8 +105,12 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
         self.commands_bnum = None # The breakpoint number for which we are
                                   # defining a list
 
-        self.call_trace = []
-        self.class_of_interest = None
+        self.call_trace = [] # The trace of calls in the class of interest
+        self.class_of_interest = None # Class name we are interested in
+        self.last_val_obj = None # Stores a copy of the attributes of the object when we last were executing a method 
+        self.call_stack = [] # Current call stack in the object of iterest
+        self.all_calls = defaultdict(lambda: defaultdict(int)) # All functions calls found
+        self.class_counts = defaultdict(int) # Counts methods in each class found
 
     def reset(self):
         bdb.Bdb.reset(self)
@@ -245,12 +249,6 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
         
         return changes_to_new
 
-
-    last_val_obj = None
-    call_stack = []
-    
-    all_calls = defaultdict(lambda: defaultdict(int))
-    class_counts = defaultdict(int)
 
     def interaction(self, frame, traceback, func_call=False, func_return=False):
 
