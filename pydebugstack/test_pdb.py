@@ -269,7 +269,7 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
        
         # Look for the class
         if 'self' in local_vars:
-            if str(local_vars['self'].__class__) == self.class_of_interest:
+            if self.class_of_interest != None and str(local_vars['self'].__class__) == self.class_of_interest:
                 print "THIs is the class"
 
                 if func_call:
