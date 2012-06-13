@@ -81,6 +81,22 @@ class MyTest3(MyTest):
         self.b += (val * 100)
 
 
+class MyTest4(MyTest):
+    """ Class that returns objects """
+
+    def get_for_a(self):
+        return AnObject()
+
+
+class AnObject():
+    """ Generic class that can be passed around """
+
+    def __init__(self):
+        self.x = 1
+        self.y = 10
+        self.z = 100
+
+
 def manipulate_class(class_in):
     """ This function calls the specified class so behaviour is created """
 
