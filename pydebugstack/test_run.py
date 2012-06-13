@@ -4,10 +4,9 @@ import linecache
 import test_pdb
 import mytest
 
+def manipulate_class(class_in):
 
-def manipulate_class():
-
-    test_obj = mytest.MyTest()
+    test_obj = class_in()
 
     test_obj.add(4)
     out = test_obj.get()
@@ -35,7 +34,7 @@ if __name__ == "__main__":
    
     pdb_obj.set_class_to_watch("mytest.MyTest")
 
-    pdb_obj.do_runcall(manipulate_class)
+    pdb_obj.do_runcall(manipulate_class, mytest.MyTest)
 
     print
     print "!!!!!!!!!!!!!!!!!!!----------------"
