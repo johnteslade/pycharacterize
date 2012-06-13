@@ -7,12 +7,15 @@ import logging
 
 class MyTestBase:
 
-    def add(self, item):
+    def add_a(self, item):
         raise NotImplementedError
 
-    def get(self):
+    def get_a(self):
         raise NotImplementedError
     
+    def get_for_a(self):
+        raise NotImplementedError
+
     def inc(self, val):
         raise NotImplementedError
     
@@ -30,12 +33,15 @@ class MyTest(MyTestBase):
         self.b = 1
         self.c = 2
 
-    def add(self, item):
+    def add_a(self, item):
         self.a.append(item)
 
-    def get(self):
+    def get_a(self):
         return self.a
-    
+
+    def get_for_a(self):
+        return 4
+
     def inc(self, val):
         self.b += val
     
@@ -49,12 +55,15 @@ class MyTest(MyTestBase):
 class MyTest2(MyTestBase):
     """ Class that has no main constructor """
 
-    def add(self, item):
+    def add_a(self, item):
         pass
 
-    def get(self):
+    def get_a(self):
         return 1
-    
+
+    def get_for_a(self):
+        return 4
+
     def inc(self, val):
         return 99 + val
     
@@ -77,8 +86,11 @@ def manipulate_class(class_in):
 
     test_obj = class_in()
 
-    test_obj.add(4)
-    out = test_obj.get()
+    item_for_a = test_obj.get_for_a()
+    print "manipulate_class: {}".format(item_for_a)
+
+    test_obj.add_a(item_for_a)
+    out = test_obj.get_a()
     print "manipulate_class: {}".format(out)
 
     out = test_obj.equal()
