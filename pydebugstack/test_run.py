@@ -26,6 +26,8 @@ def manipulate_class():
     out = test_obj.equal()
     print "manipulate_class: {}".format(out)
 
+    exit()
+
 
 if __name__ == "__main__":
     
@@ -33,7 +35,7 @@ if __name__ == "__main__":
    
     pdb_obj.set_class_to_watch("mytest.MyTest")
 
-    pdb_obj.runcall(manipulate_class)
+    pdb_obj.do_runcall(manipulate_class)
 
     print
     print "!!!!!!!!!!!!!!!!!!!----------------"

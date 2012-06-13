@@ -146,6 +146,15 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
                 if len(line) > 0 and line[0] != '#':
                     self.onecmd(line)
 
+    def do_runcall(self, *args, **kwds):
+        """ Makes the function call """
+
+        # Run but catch if the program exits - we still need to keep executing
+        try:
+            self.runcall(*args, **kwds)
+        except SystemExit:
+            logging.debug("Caller raised SystemExit")
+
     # Override Bdb methods
 
     def user_call(self, frame, argument_list):
