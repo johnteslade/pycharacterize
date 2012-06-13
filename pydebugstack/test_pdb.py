@@ -347,19 +347,30 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
             code_out.append("obj_var = {}()".format(self.class_of_interest))
             code_out.append("")
 
+        # Handle all trace items
         for call in self.call_trace:
+
+            # Change in attribute types
             if call['type'] == "attr_change":
-                    code_out.append("########### attr change")
+                    code_out.append("# Attributes changed directly")
                     for k, v in call['vals'].items():                    
                         code_out.append("obj_var.{} = {}".format(k,v))
+
+            # Function                         
             else:
 
+                # Init
                 if call['func'] == "__init__":
+                    code_out.append("# Object initialiser with params")
                     code_out.append("obj_var = {}({})".format(self.class_of_interest, self.format_input_text(call['inputs'])))
+                # Func with return
                 elif call['return'] != None:
+                    code_out.append("# Call to {} with return".format(call['func']))
                     code_out.append("ret = obj_var.{}({})".format(call['func'], self.format_input_text(call['inputs'])))
                     code_out.append("assert ret == {}".format(call['return']))
+                # Func no return
                 else:
+                    code_out.append("# Call to {}".format(call['func']))
                     code_out.append("obj_var.{}({})".format(call['func'], self.format_input_text(call['inputs'])))
                 
                 code_out.append("")
