@@ -47,6 +47,14 @@ if __name__ == "__main__":
     print test_code
 
     print
+    print "---------------- All Calls"
+    print pdb_obj.all_calls.items()
+    print pdb_obj.class_counts.items()
+    print 
+
+
+
+    print
     print "!!!!!!!!!!!!!!!!!!! RUNNING THE AUTOGEN ----------------"
     print
 

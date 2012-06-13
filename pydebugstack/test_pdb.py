@@ -14,6 +14,7 @@ import re
 import pprint
 import traceback
 import inspect
+from collections import defaultdict
 
 class Restart(Exception):
     """Causes a debugger to be restarted for the debugged python program."""
@@ -248,6 +249,9 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
     last_val_obj = None
     call_stack = []
     
+    all_calls = defaultdict(lambda: defaultdict(int))
+    class_counts = defaultdict(int)
+
     def interaction(self, frame, traceback, func_call=False, func_return=False):
 
         print
@@ -269,6 +273,12 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
        
         # Look for the class
         if 'self' in local_vars:
+
+            # Save all functions we encounter
+            if func_call:
+                self.all_calls[str(local_vars['self'].__class__)][self.stack[self.curindex][0].f_code.co_name] += 1
+                self.class_counts[str(local_vars['self'].__class__)] += 1
+
             if self.class_of_interest != None and str(local_vars['self'].__class__) == self.class_of_interest:
                 print "THIs is the class"
 
