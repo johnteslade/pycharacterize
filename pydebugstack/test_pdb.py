@@ -15,6 +15,8 @@ import pprint
 import traceback
 import inspect
 from collections import defaultdict
+import logging
+
 
 class Restart(Exception):
     """Causes a debugger to be restarted for the debugged python program."""
@@ -152,7 +154,7 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
         if self._wait_for_mainpyfile:
             return
         if self.stop_here(frame):
-            print >>self.stdout, '--Call--'
+            logging.debug("Call")
             self.interaction(frame, None, func_call=True)
 
     def user_line(self, frame):
@@ -194,7 +196,7 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
         if self._wait_for_mainpyfile:
             return
         frame.f_locals['__return__'] = return_value
-        print >>self.stdout, '--Return--'
+        logging.debug("Return")
         self.interaction(frame, None, func_return=True)
 
     def user_exception(self, frame, exc_info):
@@ -252,16 +254,10 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
 
     def interaction(self, frame, traceback, func_call=False, func_return=False):
 
-        print
-        print "--------------"
-
-        print "-- RETURN"
-
-        # TODO setup does something import and also prints
         self.setup(frame, traceback)
-        self.print_stack_entry(self.stack[self.curindex])
+        #self.print_stack_entry(self.stack[self.curindex])
        
-        print "Func = {}".format(self.stack[self.curindex][0].f_code.co_name)
+        logging.debug("Func = {}".format(self.stack[self.curindex][0].f_code.co_name))
 
         (args, varargs, keywords, local_vars) = inspect.getargvalues(frame)  
         #print "a = {}".format(args)
@@ -278,7 +274,6 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
                 self.class_counts[str(local_vars['self'].__class__)] += 1
 
             if self.class_of_interest != None and str(local_vars['self'].__class__) == self.class_of_interest:
-                print "THIs is the class"
 
                 if func_call:
 
@@ -315,11 +310,11 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
                             'inputs': inputs,
                         })
 
-                    else:
-                        print "!!!!!!!! internal function call so ignoring - {}".format(self.stack[self.curindex][0].f_code.co_name)
-       
-                # Save current state of object attributes
+                    # Save current state of object attributes
                 self.last_val_obj = self.create_obj_attr_dict(local_vars['self'])
+
+        logging.debug("")
+        logging.debug("--------------")
 
         # Carry on the execution
         self.do_step(None)
@@ -1044,12 +1039,7 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
 
     def print_stack_entry(self, frame_lineno, prompt_prefix=line_prefix):
         frame, lineno = frame_lineno
-        if frame is self.curframe:
-            print >>self.stdout, '>',
-        else:
-            print >>self.stdout, ' ',
-        print >>self.stdout, self.format_stack_entry(frame_lineno,
-                                                     prompt_prefix)
+        logging.debug(self.format_stack_entry(frame_lineno, prompt_prefix))
 
     def lookupmodule(self, filename):
         """Helper function for break/clear parsing -- may be overridden.
