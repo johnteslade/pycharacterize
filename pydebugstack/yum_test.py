@@ -7,19 +7,22 @@ import yum
 import logging
 
 
-logging.basicConfig(level=logging.INFO)
 
 
 if __name__ == "__main__":
     
+    logging.basicConfig(level=logging.INFO)
+    #logging.basicConfig(level=logging.DEBUG)
+
     sys.path.insert(0, '/usr/share/yum-cli')
     import yummain
 
     pdb_obj = test_pdb.TestPdb()
    
-    #pdb_obj.set_class_to_watch("mytest.MyTest")
+    pdb_obj.set_class_to_watch("yum.config.FloatOption")
 
-    pdb_obj.runcall(yummain.user_main, ['info', 'firefox'], exit_code=True)
+#    pdb_obj.do_runcall(yummain.user_main, ['info', 'firefox'], exit_code=True)
+    pdb_obj.do_runcall(yummain.user_main, [], exit_code=True)
 
 
 
