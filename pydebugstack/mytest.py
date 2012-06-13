@@ -1,3 +1,9 @@
+import unittest
+import bdb
+import sys
+import linecache
+import test_pdb
+import logging
 
 class MyTestBase:
 
@@ -42,4 +48,55 @@ class MyTest(MyTestBase):
 	def equal(self):
 		return self.b == self.c
 
+
+def manipulate_class(class_in):
+    """ This function calls the specified class so behaviour is created """
+
+    test_obj = class_in()
+
+    test_obj.add(4)
+    out = test_obj.get()
+    print "manipulate_class: {}".format(out)
+
+    out = test_obj.equal()
+    print "manipulate_class: {}".format(out)
+   
+    test_obj.c = 3
+
+    test_obj.inc_by_1()
+    out = test_obj.equal()
+    print "manipulate_class: {}".format(out)
+
+    test_obj.inc(3)
+    out = test_obj.equal()
+    print "manipulate_class: {}".format(out)
+
+    exit()
+
+class Test_test_Pdb(unittest.TestCase):
+    
+    def setUp(self):
+        pass
+
+    def test_MyTest(self):
+
+        pdb_obj = test_pdb.TestPdb()
+        pdb_obj.set_class_to_watch("MyTest")
+        pdb_obj.do_runcall(manipulate_class, MyTest)
+
+        # There must be a call trace
+        self.assertTrue(len(pdb_obj.call_trace) > 0)
+
+        # Check we have some test code output
+        test_code = pdb_obj.output_test_code()
+        self.assertTrue(test_code > 0)
+
+        # Execute the code - this will raise exceptions if wrong
+        exec(test_code)
+
+
+if __name__ == '__main__':
+    
+    #logging.basicConfig(level=logging.DEBUG)
+    unittest.main()
 

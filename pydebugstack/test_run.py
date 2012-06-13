@@ -3,38 +3,16 @@ import sys
 import linecache
 import test_pdb
 import mytest
-
-def manipulate_class(class_in):
-
-    test_obj = class_in()
-
-    test_obj.add(4)
-    out = test_obj.get()
-    print "manipulate_class: {}".format(out)
-
-    out = test_obj.equal()
-    print "manipulate_class: {}".format(out)
-   
-    test_obj.c = 3
-
-    test_obj.inc_by_1()
-    out = test_obj.equal()
-    print "manipulate_class: {}".format(out)
-
-    test_obj.inc(3)
-    out = test_obj.equal()
-    print "manipulate_class: {}".format(out)
-
-    exit()
-
+import logging
 
 if __name__ == "__main__":
     
-    pdb_obj = test_pdb.TestPdb()
-   
-    pdb_obj.set_class_to_watch("mytest.MyTest")
+    logging.basicConfig(level=logging.DEBUG)
+    #logging.basicConfig(level=logging.INFO)
 
-    pdb_obj.do_runcall(manipulate_class, mytest.MyTest)
+    pdb_obj = test_pdb.TestPdb()
+    pdb_obj.set_class_to_watch("mytest.MyTest")
+    pdb_obj.do_runcall(mytest.manipulate_class, mytest.MyTest)
 
     print
     print "!!!!!!!!!!!!!!!!!!!----------------"
