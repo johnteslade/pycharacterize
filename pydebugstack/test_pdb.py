@@ -249,9 +249,6 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
     
     def interaction(self, frame, traceback, func_call=False, func_return=False):
 
-        # TODO ensure we don't capture calls that original from within the class
-        # use the call entry/exit to determine this - if we have an outstanding call, then another call should be ignore
-    
         print
         print "--------------"
 
