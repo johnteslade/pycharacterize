@@ -263,6 +263,7 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
                         
                         self.call_trace.append({
                             'type': 'attr_change',
+                            'vals': new_val_obj,
                         })
 
                 if func_return:
@@ -297,6 +298,8 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
         for call in self.call_trace:
             if call['type'] == "attr_change":
                     code_out.append("########### attr change")
+                    for k, v in call['vals'].items():                    
+                        code_out.append("obj_var.{} = {}".format(k,v))
             else:
 
                 if call['func'] == "__init__":
