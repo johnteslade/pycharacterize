@@ -15,7 +15,9 @@ def manipulate_class():
 
     out = test_obj.equal()
     print out
-    
+   
+    test_obj.c = 3
+
     test_obj.inc()
     out = test_obj.equal()
     print out
@@ -23,7 +25,6 @@ def manipulate_class():
     test_obj.inc(3)
     out = test_obj.equal()
     print out    
-
 
 if __name__ == "__main__":
 

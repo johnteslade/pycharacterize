@@ -210,45 +210,77 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
         """ Sets the class name to watch for - as a string """
         self.class_of_interest = class_name
 
+    def create_obj_attr_dict(self, obj):
+        """ Creates a dictionary with just the object attributes """
+
+        # TODO this should just be a utility
+
+        attr_out = {}
+       
+        import types
+
+        for attr_name in dir(obj):
+            if not attr_name.startswith('__'):
+                attr_val = getattr(obj, attr_name) 
+                if not type(attr_val) is types.MethodType:
+                    attr_out[attr_name] = attr_val
+
+        return attr_out
+
+    last_val_obj = None
+
     def interaction(self, frame, traceback, func_call=False, func_return=False):
-        
 
         # TODO ensure we don't capture calls that original from within the class
         # use the call entry/exit to determine this - if we have an outstanding call, then another call should be ignore
+    
+        print
+        print "--------------"
 
-        if func_return:
-            print
-            print "--------------"
+        print "-- RETURN"
 
-            print "-- RETURN"
+        self.setup(frame, traceback)
+        self.print_stack_entry(self.stack[self.curindex])
+       
+        print "Func = {}".format(self.stack[self.curindex][0].f_code.co_name)
 
-            self.setup(frame, traceback)
-            self.print_stack_entry(self.stack[self.curindex])
-           
-            print "Func = {}".format(self.stack[self.curindex][0].f_code.co_name)
+        (args, varargs, keywords, local_vars) = inspect.getargvalues(frame)  
+        print "a = {}".format(args)
+        print "v = {}".format(varargs)
+        print "k = {}".format(keywords)
+        print "l = {}".format(local_vars)
+       
+        # Look for the class
+        if 'self' in local_vars:
+            if str(local_vars['self'].__class__) == self.class_of_interest:
+                print "THIs is the class"
 
+                if func_call:
 
-            (args, varargs, keywords, local_vars) = inspect.getargvalues(frame)  
-            print "a = {}".format(args)
-            print "v = {}".format(varargs)
-            print "k = {}".format(keywords)
-            print "l = {}".format(local_vars)
-           
-            # Look for the class
-            if 'self' in local_vars:
-                if str(local_vars['self'].__class__) == self.class_of_interest:
-                    print "THIs is the class"
+                    new_val_obj = self.create_obj_attr_dict(local_vars['self'])
+                    if (self.last_val_obj != None) and (self.last_val_obj != new_val_obj):
+                        print "!!!!! OBJ attributes changed before call"
+                        
+                        self.call_trace.append({
+                            'type': 'attr_change',
+                        })
+
+                if func_return:
 
                     inputs = local_vars.copy()
                     del inputs['self']
                     del inputs['__return__']
 
                     self.call_trace.append({
+                        'type': 'func_call',
                         'func': self.stack[self.curindex][0].f_code.co_name, 
                         'return': local_vars['__return__'],
                         'inputs': inputs,
                     })
-        
+       
+            # Save current state of object attributes
+            self.last_val_obj = self.create_obj_attr_dict(local_vars['self'])
+
         # Carry on the execution
         self.do_step(None)
         print "!!! stepping"
@@ -263,15 +295,19 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
         code_out.append("")
 
         for call in self.call_trace:
-            if call['func'] == "__init__":
-                code_out.append("obj_var = {}({})".format(self.class_of_interest, self.format_input_text(call['inputs'])))
-            elif call['return'] != None:
-                code_out.append("ret = obj_var.{}({})".format(call['func'], self.format_input_text(call['inputs'])))
-                code_out.append("assert ret == {}".format(call['return']))
+            if call['type'] == "attr_change":
+                    code_out.append("########### attr change")
             else:
-                code_out.append("obj_var.{}({})".format(call['func'], self.format_input_text(call['inputs'])))
-            
-            code_out.append("")
+
+                if call['func'] == "__init__":
+                    code_out.append("obj_var = {}({})".format(self.class_of_interest, self.format_input_text(call['inputs'])))
+                elif call['return'] != None:
+                    code_out.append("ret = obj_var.{}({})".format(call['func'], self.format_input_text(call['inputs'])))
+                    code_out.append("assert ret == {}".format(call['return']))
+                else:
+                    code_out.append("obj_var.{}({})".format(call['func'], self.format_input_text(call['inputs'])))
+                
+                code_out.append("")
        
         code_out.append("""print "Done with execution of autogen test harness for {}" """.format(self.class_of_interest))
         code_out.append("") 
