@@ -349,6 +349,9 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
             code_out.append("obj_var = {}()".format(self.class_of_interest))
             code_out.append("")
 
+        # We must have a call trace to do this
+        assert len(self.call_trace) > 0
+
         # Handle all trace items
         for call in self.call_trace:
 
