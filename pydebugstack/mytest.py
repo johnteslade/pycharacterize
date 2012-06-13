@@ -78,11 +78,12 @@ class Test_test_Pdb(unittest.TestCase):
     def setUp(self):
         pass
 
-    def test_MyTest(self):
+    def manipulate_given_class(self, class_to_test, class_to_watch_str):
+        """ Tests the given class using manipulate_class() """
 
         pdb_obj = test_pdb.TestPdb()
-        pdb_obj.set_class_to_watch("MyTest")
-        pdb_obj.do_runcall(manipulate_class, MyTest)
+        pdb_obj.set_class_to_watch(class_to_watch_str)
+        pdb_obj.do_runcall(manipulate_class, class_to_test)
 
         # There must be a call trace
         self.assertTrue(len(pdb_obj.call_trace) > 0)
@@ -93,6 +94,10 @@ class Test_test_Pdb(unittest.TestCase):
 
         # Execute the code - this will raise exceptions if wrong
         exec(test_code)
+
+    def test_MyTest(self):
+
+        self.manipulate_given_class(MyTest, "MyTest")
 
 
 if __name__ == '__main__':
