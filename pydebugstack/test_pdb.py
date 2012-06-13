@@ -378,7 +378,7 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
                     code_out.append("# Call to {}".format(call['func']))
                     code_out.append("obj_var.{}({})".format(call['func'], self.format_input_text(call['inputs'])))
                 
-                code_out.append("")
+            code_out.append("")
        
         code_out.append("""print "Done with execution of autogen test harness for {}" """.format(self.class_of_interest))
         code_out.append("") 
