@@ -11,20 +11,20 @@ def manipulate_class():
 
     test_obj.add(4)
     out = test_obj.get()
-    print out
+    print "manipulate_class: {}".format(out)
 
     out = test_obj.equal()
-    print out
+    print "manipulate_class: {}".format(out)
    
     test_obj.c = 3
 
     test_obj.inc_by_1()
     out = test_obj.equal()
-    print out
+    print "manipulate_class: {}".format(out)
 
     test_obj.inc(3)
     out = test_obj.equal()
-    print out    
+    print "manipulate_class: {}".format(out)
 
 
 if __name__ == "__main__":
