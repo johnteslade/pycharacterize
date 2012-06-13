@@ -105,6 +105,7 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
                                   # defining a list
 
         self.call_trace = []
+        self.class_of_interest = None
 
     def reset(self):
         bdb.Bdb.reset(self)
