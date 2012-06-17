@@ -64,9 +64,10 @@ class ObjectCodeOutput():
         output_list = []
 
         if self.can_print_var(var_in):
-            output_list.append("{} = {}".format(new_var_name, var_in))
             if with_assert:
-                output_list.append("assert(ret == {})".format(new_var_name))
+                output_list.append("assert(ret == {})".format(var_in))
+            else:
+                output_list.append("{} = {}".format(new_var_name, var_in))
         
         else:
             
