@@ -1,3 +1,5 @@
+import types
+
 
 class ObjectState():
     """ Class to hold the state of an object """
@@ -9,6 +11,7 @@ class ObjectState():
         self.last_val_obj = None # Stores a copy of the attributes of the object when we last were executing a method 
         self.call_stack = [] # Current call stack in the object of iterest
         self.class_name = class_name # Name of class being watched - TODO assert this is correct on calls
+
 
     def function_call(self, local_vars, func_name):
         """ A call to a function """
@@ -23,6 +26,7 @@ class ObjectState():
                 'type': 'attr_change',
                 'vals': self.changes_between_dict(self.last_val_obj, new_val_obj),
             })
+
 
     def function_return(self, local_vars, func_name):
         """ A return from a function """
@@ -53,11 +57,7 @@ class ObjectState():
     def create_obj_attr_dict(self, obj):
         """ Creates a dictionary with just the object attributes """
 
-        # TODO this should just be a utility
-
         attr_out = {}
-       
-        import types
 
         for attr_name in dir(obj):
             if not attr_name.startswith('__'):
@@ -70,8 +70,6 @@ class ObjectState():
 
     def changes_between_dict(self, old, new):
         """ finds the differences in the dicts and returns the changes requried to old to get to new """
-
-        # TODO utility 
 
         changes_to_new = {}
 
