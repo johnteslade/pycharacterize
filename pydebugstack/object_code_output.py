@@ -66,7 +66,7 @@ class ObjectCodeOutput():
         if self.can_print_var(var_in):
             output_list.append("{} = {}".format(new_var_name, var_in))
             if with_assert:
-                output_list.append("assert(ret == expected_return)")
+                output_list.append("assert(ret == {})".format(new_var_name))
         
         else:
             
@@ -76,7 +76,7 @@ class ObjectCodeOutput():
             # TODO attempt to eval this and if fails go to pickle??
 
             if with_assert:
-                output_list.append("assert(ret.__dict__ == expected_return.__dict__)")
+                output_list.append("assert(ret.__dict__ == {}.__dict__)".format(new_var_name))
         
         return output_list 
 
