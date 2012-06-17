@@ -106,7 +106,7 @@ class ObjectCodeOutput():
     def can_print_var(self, var_in):
         """ Can the variable be printed and then reconstructed? """
         
-        return type(var_in) in [bool, int, list, set, dict]
+        return (var_in == None) or (type(var_in) in [bool, int, list, set, dict, str])
 
 
 
