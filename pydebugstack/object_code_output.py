@@ -11,6 +11,8 @@ class ObjectCodeOutput():
 
         code_out.append("""print "Starting execution of autogen test harness for {}" """.format(object_state.class_name))
         code_out.append("")
+        code_out.append("from object_factory import object_factory")
+        code_out.append("")
 
         # Create obj if we have no explict __init__call
         if len(filter(lambda x: x['type'] == 'func_call' and x['func'] == "__init__", object_state.call_trace)) == 0:
@@ -73,9 +75,7 @@ class ObjectCodeOutput():
                 output_list.append("{} = {}".format(new_var_name, var_in))
         
         else:
-            
-            output_list.append("{} = {}.{}()".format(new_var_name, var_in.__class__.__module__, var_in.__class__.__name__))
-            output_list = output_list + [ "setattr({}, '{}', {})".format(new_var_name, k, var_in.__dict__[k]) for k in var_in.__dict__.keys() ]
+            output_list.append("{} = object_factory({}.{}, {})".format(new_var_name, var_in.__class__.__module__, var_in.__class__.__name__,   var_in.__dict__))
 
             # TODO attempt to eval this and if fails go to pickle??
 
