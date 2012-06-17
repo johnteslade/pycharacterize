@@ -37,7 +37,7 @@ class MyTest(MyTestBase):
         self.a.append(item)
 
     def get_a(self):
-        return self.a
+        return len(self.a)
 
     def get_for_a(self):
         return 4
