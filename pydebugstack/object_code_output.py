@@ -33,16 +33,22 @@ class ObjectCodeOutput():
                 # Init
                 if call['func'] == "__init__":
                     code_out.append("# Object initialiser with params")
-                    code_out.append("obj_var = {}({})".format(object_state.class_name, self.format_input_text(call['inputs'])))
-                # Func with return
-                elif call['return'] != None:
-                    code_out.append("# Call to {} with return".format(call['func']))
-                    code_out.append("ret = obj_var.{}({})".format(call['func'], self.format_input_text(call['inputs'])))
-                    code_out = code_out + self.var_constructor(call['return'], "expected_return", True)
-                # Func no return
+                    (func_inputs, additional_constructors) = self.format_input_text(call['inputs']) 
+                    code_out += additional_constructors
+                    code_out.append("obj_var = {}({})".format(object_state.class_name, func_inputs))
+
+                # Function call
                 else:
                     code_out.append("# Call to {}".format(call['func']))
-                    code_out.append("obj_var.{}({})".format(call['func'], self.format_input_text(call['inputs'])))
+               
+                    (func_inputs, additional_constructors) = self.format_input_text(call['inputs']) 
+                    code_out += additional_constructors
+
+                    if call['return'] != None:
+                        code_out.append("ret = obj_var.{}({})".format(call['func'], func_inputs))
+                        code_out = code_out + self.var_constructor(call['return'], "expected_return", True)
+                    else:
+                        code_out.append("obj_var.{}({})".format(call['func'], func_inputs))
                 
             code_out.append("")
        
@@ -57,7 +63,7 @@ class ObjectCodeOutput():
 
         output_list = []
 
-        if type(var_in) in [bool, int, list, set, dict]:
+        if self.can_print_var(var_in):
             output_list.append("{} = {}".format(new_var_name, var_in))
             if with_assert:
                 output_list.append("assert(ret == expected_return)")
@@ -76,9 +82,30 @@ class ObjectCodeOutput():
 
 
     def format_input_text(self, inputs):
-        
-        return ", ".join([ "{}={}".format(k, v) for (k, v) in inputs.items() ])
+       
+        input_list = []
+        additional_constructors = []
 
+        var_int = 0
+
+        for (k, v) in inputs.items(): 
+            if self.can_print_var(v):
+                input_list.append("{}={}".format(k, v))
+            else:
+                var_int += 1
+                temp_obj_name = "temp_var_{}".format(var_int)
+
+                additional_constructors += self.var_constructor(v, temp_obj_name, False)
+
+                input_list.append("{}={}".format(k, temp_obj_name))
+        
+        return (", ".join(input_list), additional_constructors)
+
+
+    def can_print_var(self, var_in):
+        """ Can the variable be printed and then reconstructed? """
+        
+        return type(var_in) in [bool, int, list, set, dict]
 
 
 
