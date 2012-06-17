@@ -1,4 +1,6 @@
 from object_state import ObjectState
+from object_code_output import ObjectCodeOutput
+
 
 class ObjectsList():
     """ Class to hold the objects of interest as they change """
@@ -33,7 +35,7 @@ class ObjectsList():
         self.object_state.function_return(local_vars, func_name)
 
     def output_test_code(self):
-        return self.object_state.output_test_code()
+        return ObjectCodeOutput().output_test_code(self.object_state)
 
     
     def get_call_trace(self):
