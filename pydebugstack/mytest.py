@@ -137,7 +137,7 @@ class Test_test_Pdb(unittest.TestCase):
         pdb_obj.do_runcall(manipulate_class, class_to_test)
 
         # There must be a call trace
-        self.assertTrue(len(pdb_obj.call_trace) > 0)
+        self.assertTrue(len(pdb_obj.objects_list.get_call_trace()) > 0)
 
         # Check we have some test code output
         test_code = pdb_obj.output_test_code()

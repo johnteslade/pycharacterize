@@ -18,10 +18,6 @@ if __name__ == "__main__":
     print "!!!!!!!!!!!!!!!!!!!----------------"
     print
 
-    print pdb_obj.call_trace
-    
-    print
-
     test_code = pdb_obj.output_test_code()
     print test_code
 
