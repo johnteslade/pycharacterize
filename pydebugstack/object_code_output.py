@@ -38,7 +38,7 @@ class ObjectCodeOutput():
                 elif call['return'] != None:
                     code_out.append("# Call to {} with return".format(call['func']))
                     code_out.append("ret = obj_var.{}({})".format(call['func'], self.format_input_text(call['inputs'])))
-                    code_out = code_out + self.var_constructor(call['return'], "expected_return")
+                    code_out = code_out + self.var_constructor(call['return'], "expected_return", True)
                 # Func no return
                 else:
                     code_out.append("# Call to {}".format(call['func']))
@@ -52,24 +52,27 @@ class ObjectCodeOutput():
         return "\n".join(code_out)
 
 
-    def var_constructor(self, var_in, new_var_name):
+    def var_constructor(self, var_in, new_var_name, with_assert):
         """ Returns a list of code that would reconstruct the given object """
 
+        output_list = []
+
         if type(var_in) in [bool, int, list, set, dict]:
-            return [
-                "{} = {}".format(new_var_name, var_in),
-                "assert(ret == expected_return)"
-            ]
+            output_list.append("{} = {}".format(new_var_name, var_in))
+            if with_assert:
+                output_list.append("assert(ret == expected_return)")
+        
         else:
-            output_list = []
             
             output_list.append("{} = {}.{}()".format(new_var_name, var_in.__class__.__module__, var_in.__class__.__name__))
             output_list = output_list + [ "setattr({}, '{}', {})".format(new_var_name, k, var_in.__dict__[k]) for k in var_in.__dict__.keys() ]
 
             # TODO attempt to eval this and if fails go to pickle??
 
-            output_list.append("assert(ret.__dict__ == expected_return.__dict__)")
-            return output_list 
+            if with_assert:
+                output_list.append("assert(ret.__dict__ == expected_return.__dict__)")
+        
+        return output_list 
 
 
     def format_input_text(self, inputs):
