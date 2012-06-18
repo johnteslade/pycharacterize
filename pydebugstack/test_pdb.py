@@ -226,9 +226,25 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
     def set_class_to_watch(self, class_name):
         """ Sets the class name to watch for - as a string """
 
-        self.objects_list.set_class_to_watch(class_name)
+        self.objects_list.set_class_to_watch(str(class_name))
 
+        print self.find_class_functions(class_name)
 
+    def find_class_functions(self, class_name):
+        """ Finds filename and lineno for all functions in the class """
+
+        func_details = []
+
+        # Look at all class attributes
+        for attr_name in dir(class_name):
+
+            attr = getattr(class_name, attr_name)
+
+            # If a function then save
+            if 'im_func' in dir(attr):
+                func_details.append({'name': attr.func_code.co_name, 'line': attr.func_code.co_firstlineno, 'filename': attr.func_code.co_filename})
+
+        return func_details
 
 
     def interaction(self, frame, traceback, func_call=False, func_return=False):

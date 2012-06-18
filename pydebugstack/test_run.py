@@ -11,7 +11,8 @@ if __name__ == "__main__":
     #logging.basicConfig(level=logging.INFO)
 
     pdb_obj = test_pdb.TestPdb()
-    pdb_obj.set_class_to_watch("mytest.MyTest4")
+    pdb_obj.set_class_to_watch(mytest.MyTest4)
+
     pdb_obj.do_runcall(mytest.manipulate_class, mytest.MyTest4)
 
     print
