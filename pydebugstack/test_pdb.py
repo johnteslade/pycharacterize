@@ -41,8 +41,9 @@ line_prefix = '\n-> '   # Probably a better default
 
 class TestPdb(bdb.Bdb):
 
-    def __init__(self, completekey='tab', stdin=None, stdout=None, skip=None):
+    def __init__(self, completekey='tab', stdin=None, stdout=None, skip=None, step_all=False):
         bdb.Bdb.__init__(self, skip=skip)
+        
         if stdout:
             self.use_rawinput = 0
         self.prompt = '(Pdb) '
@@ -55,6 +56,7 @@ class TestPdb(bdb.Bdb):
         except ImportError:
             pass
 
+        self.step_all = step_all # Should we step through all execution
 
         self.commands = {} # associates a command list to breakpoint numbers
         self.commands_doprompt = {} # for each bp num, tells if the prompt
@@ -72,9 +74,10 @@ class TestPdb(bdb.Bdb):
 
         self.objects_list = ObjectsList() # List of objects
 
-    def reset(self):
-        bdb.Bdb.reset(self)
+        # Reset all vars
+        self.reset()
         self.forget()
+
 
     def forget(self):
         self.lineno = None
@@ -120,7 +123,8 @@ class TestPdb(bdb.Bdb):
                 return
             self._wait_for_mainpyfile = 0
         if self.bp_commands(frame):
-            self.interaction(frame, None)
+            logging.debug("User Line {} {}".format(frame.f_code.co_filename, frame.f_lineno))
+            self.interaction(frame, None, func_call=(not self.step_all))
 
     def bp_commands(self,frame):
         """Call every command that was set for the current active breakpoint
@@ -172,9 +176,31 @@ class TestPdb(bdb.Bdb):
     def set_class_to_watch(self, class_name):
         """ Sets the class name to watch for - as a string """
 
+        # Save the class name
         self.objects_list.set_class_to_watch(str(class_name))
 
-        print self.find_class_functions(class_name)
+        # Get list of class functions and set breakpoints
+        if not self.step_all:
+            class_functions = self.find_class_functions(class_name)
+            self.set_breakpoints(class_functions)
+
+        print "Breaks = {}".format(self.get_all_breaks())
+
+
+    def set_breakpoints(self, class_functions):
+        """ Sets breakpoints on all functions """
+
+        for funcs in class_functions:
+
+            err = self.set_break(funcs['filename'], funcs['line'], False, None, funcs['name'])
+            if err: 
+                print >>self.stdout, '***', err
+            else:
+                bp = self.get_breaks(funcs['filename'], funcs['line'])[-1]
+                print >>self.stdout, "Breakpoint %d at %s:%d" % (bp.number, bp.file, bp.line)
+
+        print "now {} breaks".format(self.get_all_breaks())
+
 
     def find_class_functions(self, class_name):
         """ Finds filename and lineno for all functions in the class """
@@ -211,7 +237,7 @@ class TestPdb(bdb.Bdb):
        
             class_name = local_vars['self'].__class__.__module__ + "." + local_vars['self'].__class__.__name__ 
 
-            logging.debug("Class = {}, Func = {}".format(class_name, self.stack[self.curindex][0].f_code.co_name))
+            logging.debug("Class = {}, Func = {}, call = {}, return = {}".format(class_name, self.stack[self.curindex][0].f_code.co_name, func_call, func_return))
 
             # Save all functions we encounter
             if func_call:
@@ -232,8 +258,16 @@ class TestPdb(bdb.Bdb):
         #logging.debug("")
         #logging.debug("--------------")
 
-        # Carry on the execution
-        self.do_step(None)
+        # Determine the step mode
+        if self.step_all:
+            self.do_step(None)
+        else:
+            # If we entered a function then wait for return
+            if self.objects_list.call_outstanding():
+                self.do_return(None)
+            else:
+                self.do_continue(None)
+
         self.forget()
 
     

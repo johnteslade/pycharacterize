@@ -12,11 +12,11 @@ class Test_test_Pdb(unittest.TestCase):
     def setUp(self):
         pass
 
-    def manipulate_given_class(self, class_to_test, class_to_watch_str):
+    def manipulate_given_class(self, class_to_test, step_all_in):
         """ Tests the given class using manipulate_class() """
 
-        pdb_obj = test_pdb.TestPdb()
-        pdb_obj.set_class_to_watch(class_to_watch_str)
+        pdb_obj = test_pdb.TestPdb(step_all=step_all_in)
+        pdb_obj.set_class_to_watch(class_to_test)
         pdb_obj.do_runcall(mytest.manipulate_class, class_to_test)
 
         # There must be a call trace
@@ -32,19 +32,19 @@ class Test_test_Pdb(unittest.TestCase):
 
     def test_MyTest(self):
 
-        self.manipulate_given_class(mytest.MyTest, "mytest.MyTest")
+        self.manipulate_given_class(mytest.MyTest, True)
     
     def test_MyTest2(self):
 
-        self.manipulate_given_class(mytest.MyTest2, "mytest.MyTest2")
+        self.manipulate_given_class(mytest.MyTest2, True)
 
     def test_MyTest3(self):
 
-        self.manipulate_given_class(mytest.MyTest3, "mytest.MyTest3")
+        self.manipulate_given_class(mytest.MyTest3, True)
 
     def test_MyTest4(self):
 
-        self.manipulate_given_class(mytest.MyTest4, "mytest.MyTest4")
+        self.manipulate_given_class(mytest.MyTest4, True)
 
 if __name__ == '__main__':
     
