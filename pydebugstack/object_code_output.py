@@ -1,8 +1,11 @@
+import logging
 
 class ObjectCodeOutput():
     """ Class to handle the outputting of code for the object """
 
     def output_test_code(self, object_state):
+
+        logging.debug("Call stack = {}".format(object_state.call_trace))
 
         code_out = []
 
