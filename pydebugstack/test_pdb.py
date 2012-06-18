@@ -32,27 +32,6 @@ _saferepr = _repr.repr
 __all__ = ["run", "pm", "Pdb", "runeval", "runctx", "runcall", "set_trace",
            "post_mortem", "help"]
 
-def find_function(funcname, filename):
-    cre = re.compile(r'def\s+%s\s*[(]' % re.escape(funcname))
-    try:
-        fp = open(filename)
-    except IOError:
-        return None
-    # consumer of this info expects the first line to be 1
-    lineno = 1
-    answer = None
-    while 1:
-        line = fp.readline()
-        if line == '':
-            break
-        if cre.match(line):
-            answer = funcname, filename, lineno
-            break
-        lineno = lineno + 1
-    fp.close()
-    return answer
-
-
 # Interaction prompt line will separate file and call info from code
 # text using value of line_prefix string.  A newline and arrow may
 # be to your liking.  You can set it once pdb is imported using the
@@ -60,11 +39,10 @@ def find_function(funcname, filename):
 # line_prefix = ': '    # Use this to get the old situation back
 line_prefix = '\n-> '   # Probably a better default
 
-class TestPdb(bdb.Bdb, cmd.Cmd):
+class TestPdb(bdb.Bdb):
 
     def __init__(self, completekey='tab', stdin=None, stdout=None, skip=None):
         bdb.Bdb.__init__(self, skip=skip)
-        cmd.Cmd.__init__(self, completekey, stdin, stdout)
         if stdout:
             self.use_rawinput = 0
         self.prompt = '(Pdb) '
@@ -77,26 +55,6 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
         except ImportError:
             pass
 
-        # Read $HOME/.pdbrc and ./.pdbrc
-        self.rcLines = []
-        if 'HOME' in os.environ:
-            envHome = os.environ['HOME']
-            try:
-                rcFile = open(os.path.join(envHome, ".pdbrc"))
-            except IOError:
-                pass
-            else:
-                for line in rcFile.readlines():
-                    self.rcLines.append(line)
-                rcFile.close()
-        try:
-            rcFile = open(".pdbrc")
-        except IOError:
-            pass
-        else:
-            for line in rcFile.readlines():
-                self.rcLines.append(line)
-            rcFile.close()
 
         self.commands = {} # associates a command list to breakpoint numbers
         self.commands_doprompt = {} # for each bp num, tells if the prompt
@@ -132,19 +90,7 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
         # locals whenever the .f_locals accessor is called, so we
         # cache it here to ensure that modifications are not overwritten.
         self.curframe_locals = self.curframe.f_locals
-        self.execRcLines()
-
-    # Can be executed earlier than 'setup' if desired
-    def execRcLines(self):
-        if self.rcLines:
-            # Make local copy because of recursion
-            rcLines = self.rcLines
-            # executed only once
-            self.rcLines = []
-            for line in rcLines:
-                line = line[:-1]
-                if len(line) > 0 and line[0] != '#':
-                    self.onecmd(line)
+        
 
     def do_runcall(self, *args, **kwds):
         """ Makes the function call """
