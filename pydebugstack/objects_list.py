@@ -37,6 +37,11 @@ class ObjectsList():
     def output_test_code(self):
         return ObjectCodeOutput().output_test_code(self.object_state)
 
+
+    def call_outstanding(self):
+        """ Are we still inside a call? """
+        return len(self.object_state.call_stack) > 0
+
     
     def get_call_trace(self):
         """ Returns the call trace """
