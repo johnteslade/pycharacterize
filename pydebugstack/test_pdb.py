@@ -72,6 +72,8 @@ class TestPdb(bdb.Bdb):
 
         self.objects_list = ObjectsList() # List of objects
 
+        self.filename_of_interest = None # The filename we are looking for
+
         # Reset all vars
         self.reset()
         self.forget()
@@ -178,10 +180,12 @@ class TestPdb(bdb.Bdb):
         self.objects_list.set_class_to_watch(str(class_name))
 
         # Get list of class functions and set breakpoints
+        class_functions = self.find_class_functions(class_name)
+        self.filename_of_interest = class_functions[0]['filename']
+        
         if not self.step_all:
-            class_functions = self.find_class_functions(class_name)
             self.set_breakpoints(class_functions)
-
+        
         print "Breaks = {}".format(self.get_all_breaks())
 
 
