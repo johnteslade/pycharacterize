@@ -179,14 +179,14 @@ class TestPdb(bdb.Bdb):
 
     # General interaction function
 
-    def set_class_to_watch(self, class_name):
+    def set_class_to_watch(self, class_name, class_name_str):
         """ Sets the class name to watch for - as a string """
 
-        if type(class_name) == str:
-            raise Exception("Class name must be a class reference - not a string")
+        if type(class_name_str) != str:
+            raise Exception("Class name must be a string")
 
         # Save the class name
-        self.objects_list.set_class_to_watch(str(class_name))
+        self.objects_list.set_class_to_watch(class_name_str)
 
         # Get list of class functions and set breakpoints
         class_functions = self.find_class_functions(class_name)
@@ -235,7 +235,7 @@ class TestPdb(bdb.Bdb):
         self.setup(frame, traceback)
         #self.print_stack_entry(self.stack[self.curindex])
        
-        #logging.debug("Func = {}".format(self.stack[self.curindex][0].f_code.co_name))
+        #logging.debug("Class = {}, Func = {}, call = {}, return = {}".format("", self.stack[self.curindex][0].f_code.co_name, func_call, func_return))
 
         (args, varargs, keywords, local_vars) = inspect.getargvalues(frame)  
         #print "a = {}".format(args)
@@ -248,7 +248,11 @@ class TestPdb(bdb.Bdb):
        
             class_name = local_vars['self'].__class__.__module__ + "." + local_vars['self'].__class__.__name__ 
 
-            logging.debug("Class = {}, Func = {}, call = {}, return = {}".format(class_name, self.stack[self.curindex][0].f_code.co_name, func_call, func_return))
+            #logging.debug("Mod = {}, Class = {}".format(local_vars['self'].__class__.__module__, local_vars['self'].__class__.__name__))
+            
+
+
+            #logging.debug("Class = {}, Func = {}, call = {}, return = {}".format(class_name, self.stack[self.curindex][0].f_code.co_name, func_call, func_return))
 
             # Save all functions we encounter
             if func_call:
@@ -256,7 +260,9 @@ class TestPdb(bdb.Bdb):
                 self.class_counts[class_name] += 1
 
             # Class we are interested in? 
-            if self.objects_list.is_of_interest(class_name):
+            if self.objects_list.is_of_interest(class_name, local_vars['self'].__class__):
+            
+                logging.debug("OF iterstest --- Class = {}, Func = {}, call = {}, return = {}".format(class_name, self.stack[self.curindex][0].f_code.co_name, func_call, func_return))
             
                 if func_call:
                     self.objects_list.function_call(local_vars, self.stack[self.curindex][0].f_code.co_name)
@@ -275,6 +281,7 @@ class TestPdb(bdb.Bdb):
         else:
             # If we entered a function then wait for return
             if self.objects_list.call_outstanding():
+                logging.debug("Call outstanding - do return")
                 self.do_return(None)
             else:
                 self.do_continue(None)

@@ -19,7 +19,7 @@ if __name__ == "__main__":
 
     pdb_obj = test_pdb.TestPdb()
    
-    pdb_obj.set_class_to_watch(yum.config.BoolOption)
+    pdb_obj.set_class_to_watch(yum.config.BoolOption, "yum.config.BoolOption")
 
 #    pdb_obj.do_runcall(yummain.user_main, ['info', 'firefox'], exit_code=True)
     pdb_obj.do_runcall(yummain.user_main, [], exit_code=True)

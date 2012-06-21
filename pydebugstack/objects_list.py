@@ -1,6 +1,6 @@
 from object_state import ObjectState
 from object_code_output import ObjectCodeOutput
-
+import logging
 
 class ObjectsList():
     """ Class to hold the objects of interest as they change """
@@ -8,20 +8,23 @@ class ObjectsList():
     def __init__(self):
         """ Init """
 
-        self.class_of_interest = None # Class we are interested in
+        self.class_of_interest = None # String of class we are interested in
+        self.class_of_interest_ref = None # Class references of class we are interested in
         self.object_state = None # The object - TODO this needs to become a list
 
 
     def set_class_to_watch(self, class_name):
         """ Sets the class name to watch for - as a string """
-        self.class_of_interest = class_name   
+        self.class_of_interest = str(class_name)
+        self.class_of_interest_ref = class_name
         self.object_state = ObjectState(class_name) # The object - TODO this needs to become a list
     
-    def is_of_interest(self, class_name):
+    def is_of_interest(self, class_name, class_name_ref):
         """ Is this class one being watched? """
 
+        #logging.debug("Of iterest in = {} , cmp = {} {}".format(class_name, self.class_of_interest, "__main__." + self.class_of_interest))
         # Sometimes the intested class with be prefixed with __main__ depending on the calling env
-        return (self.class_of_interest != None) and (class_name == self.class_of_interest or class_name == "__main__." + self.class_of_interest)
+        return (self.class_of_interest != None) and (class_name == self.class_of_interest or class_name == "__main__." + self.class_of_interest or (class_name_ref == self.class_of_interest_ref))
 
 
     def function_call(self, local_vars, func_name):
