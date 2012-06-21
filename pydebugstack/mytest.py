@@ -5,7 +5,7 @@ import linecache
 import test_pdb
 import logging
 
-class MyTestBase:
+class MyTestBase(object):
 
     def add_a(self, item):
         raise NotImplementedError
