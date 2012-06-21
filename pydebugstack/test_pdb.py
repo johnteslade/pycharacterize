@@ -32,27 +32,6 @@ _saferepr = _repr.repr
 __all__ = ["run", "pm", "Pdb", "runeval", "runctx", "runcall", "set_trace",
            "post_mortem", "help"]
 
-def find_function(funcname, filename):
-    cre = re.compile(r'def\s+%s\s*[(]' % re.escape(funcname))
-    try:
-        fp = open(filename)
-    except IOError:
-        return None
-    # consumer of this info expects the first line to be 1
-    lineno = 1
-    answer = None
-    while 1:
-        line = fp.readline()
-        if line == '':
-            break
-        if cre.match(line):
-            answer = funcname, filename, lineno
-            break
-        lineno = lineno + 1
-    fp.close()
-    return answer
-
-
 # Interaction prompt line will separate file and call info from code
 # text using value of line_prefix string.  A newline and arrow may
 # be to your liking.  You can set it once pdb is imported using the
@@ -60,13 +39,11 @@ def find_function(funcname, filename):
 # line_prefix = ': '    # Use this to get the old situation back
 line_prefix = '\n-> '   # Probably a better default
 
-class TestPdb(bdb.Bdb, cmd.Cmd):
+class TestPdb(bdb.Bdb):
 
-    def __init__(self, completekey='tab', stdin=None, stdout=None, skip=None):
+    def __init__(self, completekey='tab', skip=None, step_all=False):
         bdb.Bdb.__init__(self, skip=skip)
-        cmd.Cmd.__init__(self, completekey, stdin, stdout)
-        if stdout:
-            self.use_rawinput = 0
+        
         self.prompt = '(Pdb) '
         self.aliases = {}
         self.mainpyfile = ''
@@ -77,26 +54,7 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
         except ImportError:
             pass
 
-        # Read $HOME/.pdbrc and ./.pdbrc
-        self.rcLines = []
-        if 'HOME' in os.environ:
-            envHome = os.environ['HOME']
-            try:
-                rcFile = open(os.path.join(envHome, ".pdbrc"))
-            except IOError:
-                pass
-            else:
-                for line in rcFile.readlines():
-                    self.rcLines.append(line)
-                rcFile.close()
-        try:
-            rcFile = open(".pdbrc")
-        except IOError:
-            pass
-        else:
-            for line in rcFile.readlines():
-                self.rcLines.append(line)
-            rcFile.close()
+        self.step_all = step_all # Should we step through all execution
 
         self.commands = {} # associates a command list to breakpoint numbers
         self.commands_doprompt = {} # for each bp num, tells if the prompt
@@ -114,9 +72,12 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
 
         self.objects_list = ObjectsList() # List of objects
 
-    def reset(self):
-        bdb.Bdb.reset(self)
+        self.filename_of_interest = None # The filename we are looking for
+
+        # Reset all vars
+        self.reset()
         self.forget()
+
 
     def forget(self):
         self.lineno = None
@@ -132,19 +93,7 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
         # locals whenever the .f_locals accessor is called, so we
         # cache it here to ensure that modifications are not overwritten.
         self.curframe_locals = self.curframe.f_locals
-        self.execRcLines()
-
-    # Can be executed earlier than 'setup' if desired
-    def execRcLines(self):
-        if self.rcLines:
-            # Make local copy because of recursion
-            rcLines = self.rcLines
-            # executed only once
-            self.rcLines = []
-            for line in rcLines:
-                line = line[:-1]
-                if len(line) > 0 and line[0] != '#':
-                    self.onecmd(line)
+        
 
     def do_runcall(self, *args, **kwds):
         """ Makes the function call """
@@ -154,6 +103,12 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
             self.runcall(*args, **kwds)
         except SystemExit:
             logging.debug("Caller raised SystemExit")
+        finally:
+            # Clear breaks
+            # This appears to be a bug in bdb - if they are not cleared they are still active in 
+            # the next instance of BDB
+            self.clear_all_breaks()
+
 
     # Override Bdb methods
 
@@ -174,7 +129,8 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
                 return
             self._wait_for_mainpyfile = 0
         if self.bp_commands(frame):
-            self.interaction(frame, None)
+            logging.debug("Line {} {}".format(frame.f_code.co_filename, frame.f_lineno))
+            self.interaction(frame, None, func_call=(not self.step_all))
 
     def bp_commands(self,frame):
         """Call every command that was set for the current active breakpoint
@@ -226,9 +182,52 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
     def set_class_to_watch(self, class_name):
         """ Sets the class name to watch for - as a string """
 
-        self.objects_list.set_class_to_watch(class_name)
+        if type(class_name) == str:
+            raise Exception("Class name must be a class reference - not a string")
+
+        # Save the class name
+        self.objects_list.set_class_to_watch(str(class_name))
+
+        # Get list of class functions and set breakpoints
+        class_functions = self.find_class_functions(class_name)
+        self.filename_of_interest = class_functions[0]['filename']
+        
+        if not self.step_all:
+            self.set_breakpoints(class_functions)
+        
+        print "Breaks = {}".format(self.get_all_breaks())
 
 
+    def set_breakpoints(self, class_functions):
+        """ Sets breakpoints on all functions """
+
+        for funcs in class_functions:
+
+            err = self.set_break(funcs['filename'], funcs['line'], False, None, funcs['name'])
+            if err: 
+                print '***', err
+            else:
+                bp = self.get_breaks(funcs['filename'], funcs['line'])[-1]
+                print "Breakpoint %d at %s:%d" % (bp.number, bp.file, bp.line)
+
+        print "now {} breaks".format(self.get_all_breaks())
+
+
+    def find_class_functions(self, class_name):
+        """ Finds filename and lineno for all functions in the class """
+
+        func_details = []
+
+        # Look at all class attributes
+        for attr_name in dir(class_name):
+
+            attr = getattr(class_name, attr_name)
+
+            # If a function then save
+            if 'im_func' in dir(attr):
+                func_details.append({'name': attr.func_code.co_name, 'line': attr.func_code.co_firstlineno, 'filename': attr.func_code.co_filename})
+
+        return func_details
 
 
     def interaction(self, frame, traceback, func_call=False, func_return=False):
@@ -249,7 +248,7 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
        
             class_name = local_vars['self'].__class__.__module__ + "." + local_vars['self'].__class__.__name__ 
 
-            logging.debug("Class = {}, Func = {}".format(class_name, self.stack[self.curindex][0].f_code.co_name))
+            logging.debug("Class = {}, Func = {}, call = {}, return = {}".format(class_name, self.stack[self.curindex][0].f_code.co_name, func_call, func_return))
 
             # Save all functions we encounter
             if func_call:
@@ -270,8 +269,16 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
         #logging.debug("")
         #logging.debug("--------------")
 
-        # Carry on the execution
-        self.do_step(None)
+        # Determine the step mode
+        if self.step_all:
+            self.do_step(None)
+        else:
+            # If we entered a function then wait for return
+            if self.objects_list.call_outstanding():
+                self.do_return(None)
+            else:
+                self.do_continue(None)
+
         self.forget()
 
     
@@ -316,7 +323,7 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
             if type(t) == type(''):
                 exc_type_name = t
             else: exc_type_name = t.__name__
-            print >>self.stdout, '***', exc_type_name + ':', v
+            print '***', exc_type_name + ':', v
 
     def precmd(self, line):
         """Handle alias expansion and ';;' separator."""
@@ -400,7 +407,7 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
             try:
                 bnum = int(arg)
             except:
-                print >>self.stdout, "Usage : commands [bnum]\n        ..." \
+                print "Usage : commands [bnum]\n        ..." \
                                      "\n        end"
                 return
         self.commands_bnum = bnum
@@ -420,7 +427,7 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
         # break [ ([filename:]lineno | function) [, "condition"] ]
         if not arg:
             if self.breaks:  # There's at least one
-                print >>self.stdout, "Num Type         Disp Enb   Where"
+                print "Num Type         Disp Enb   Where"
                 for bp in bdb.Breakpoint.bpbynumber:
                     if bp:
                         bp.bpprint(self.stdout)
@@ -442,8 +449,8 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
             filename = arg[:colon].rstrip()
             f = self.lookupmodule(filename)
             if not f:
-                print >>self.stdout, '*** ', repr(filename),
-                print >>self.stdout, 'not found from sys.path'
+                print '*** ', repr(filename),
+                print 'not found from sys.path'
                 return
             else:
                 filename = f
@@ -451,7 +458,7 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
             try:
                 lineno = int(arg)
             except ValueError, msg:
-                print >>self.stdout, '*** Bad lineno:', arg
+                print '*** Bad lineno:', arg
                 return
         else:
             # no colon; can be lineno or function
@@ -477,10 +484,10 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
                     # last thing to try
                     (ok, filename, ln) = self.lineinfo(arg)
                     if not ok:
-                        print >>self.stdout, '*** The specified object',
-                        print >>self.stdout, repr(arg),
-                        print >>self.stdout, 'is not a function'
-                        print >>self.stdout, 'or was not found along sys.path.'
+                        print '*** The specified object',
+                        print repr(arg),
+                        print 'is not a function'
+                        print 'or was not found along sys.path.'
                         return
                     funcname = ok # ok contains a function name
                     lineno = int(ln)
@@ -491,10 +498,10 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
         if line:
             # now set the break point
             err = self.set_break(filename, line, temporary, cond, funcname)
-            if err: print >>self.stdout, '***', err
+            if err: print '***', err
             else:
                 bp = self.get_breaks(filename, line)[-1]
-                print >>self.stdout, "Breakpoint %d at %s:%d" % (bp.number,
+                print "Breakpoint %d at %s:%d" % (bp.number,
                                                                  bp.file,
                                                                  bp.line)
 
@@ -555,13 +562,13 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
         globs = self.curframe.f_globals if hasattr(self, 'curframe') else None
         line = linecache.getline(filename, lineno, globs)
         if not line:
-            print >>self.stdout, 'End of file'
+            print 'End of file'
             return 0
         line = line.strip()
         # Don't allow setting breakpoint at a blank line
         if (not line or (line[0] == '#') or
              (line[:3] == '"""') or line[:3] == "'''"):
-            print >>self.stdout, '*** Blank or comment'
+            print '*** Blank or comment'
             return 0
         return lineno
 
@@ -571,11 +578,11 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
             try:
                 i = int(i)
             except ValueError:
-                print >>self.stdout, 'Breakpoint index %r is not a number' % i
+                print 'Breakpoint index %r is not a number' % i
                 continue
 
             if not (0 <= i < len(bdb.Breakpoint.bpbynumber)):
-                print >>self.stdout, 'No breakpoint numbered', i
+                print 'No breakpoint numbered', i
                 continue
 
             bp = bdb.Breakpoint.bpbynumber[i]
@@ -588,11 +595,11 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
             try:
                 i = int(i)
             except ValueError:
-                print >>self.stdout, 'Breakpoint index %r is not a number' % i
+                print 'Breakpoint index %r is not a number' % i
                 continue
 
             if not (0 <= i < len(bdb.Breakpoint.bpbynumber)):
-                print >>self.stdout, 'No breakpoint numbered', i
+                print 'No breakpoint numbered', i
                 continue
 
             bp = bdb.Breakpoint.bpbynumber[i]
@@ -606,7 +613,7 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
             bpnum = int(args[0].strip())
         except ValueError:
             # something went wrong
-            print >>self.stdout, \
+            print \
                 'Breakpoint index %r is not a number' % args[0]
             return
         try:
@@ -616,13 +623,13 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
         try:
             bp = bdb.Breakpoint.bpbynumber[bpnum]
         except IndexError:
-            print >>self.stdout, 'Breakpoint index %r is not valid' % args[0]
+            print 'Breakpoint index %r is not valid' % args[0]
             return
         if bp:
             bp.cond = cond
             if not cond:
-                print >>self.stdout, 'Breakpoint', bpnum,
-                print >>self.stdout, 'is now unconditional.'
+                print 'Breakpoint', bpnum,
+                print 'is now unconditional.'
 
     def do_ignore(self,arg):
         """arg is bp number followed by ignore count."""
@@ -631,7 +638,7 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
             bpnum = int(args[0].strip())
         except ValueError:
             # something went wrong
-            print >>self.stdout, \
+            print \
                 'Breakpoint index %r is not a number' % args[0]
             return
         try:
@@ -641,7 +648,7 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
         try:
             bp = bdb.Breakpoint.bpbynumber[bpnum]
         except IndexError:
-            print >>self.stdout, 'Breakpoint index %r is not valid' % args[0]
+            print 'Breakpoint index %r is not valid' % args[0]
             return
         if bp:
             bp.ignore = count
@@ -651,10 +658,10 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
                     reply = reply + '%d crossings' % count
                 else:
                     reply = reply + '1 crossing'
-                print >>self.stdout, reply + ' of breakpoint %d.' % bpnum
+                print reply + ' of breakpoint %d.' % bpnum
             else:
-                print >>self.stdout, 'Will stop next time breakpoint',
-                print >>self.stdout, bpnum, 'is reached.'
+                print 'Will stop next time breakpoint',
+                print bpnum, 'is reached.'
 
     def do_clear(self, arg):
         """Three possibilities, tried in this order:
@@ -681,24 +688,24 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
                 err = "Invalid line number (%s)" % arg
             else:
                 err = self.clear_break(filename, lineno)
-            if err: print >>self.stdout, '***', err
+            if err: print '***', err
             return
         numberlist = arg.split()
         for i in numberlist:
             try:
                 i = int(i)
             except ValueError:
-                print >>self.stdout, 'Breakpoint index %r is not a number' % i
+                print 'Breakpoint index %r is not a number' % i
                 continue
 
             if not (0 <= i < len(bdb.Breakpoint.bpbynumber)):
-                print >>self.stdout, 'No breakpoint numbered', i
+                print 'No breakpoint numbered', i
                 continue
             err = self.clear_bpbynumber(i)
             if err:
-                print >>self.stdout, '***', err
+                print '***', err
             else:
-                print >>self.stdout, 'Deleted breakpoint', i
+                print 'Deleted breakpoint', i
     do_cl = do_clear # 'c' is already an abbreviation for 'continue'
 
     def do_where(self, arg):
@@ -708,7 +715,7 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
 
     def do_up(self, arg):
         if self.curindex == 0:
-            print >>self.stdout, '*** Oldest frame'
+            print '*** Oldest frame'
         else:
             self.curindex = self.curindex - 1
             self.curframe = self.stack[self.curindex][0]
@@ -719,7 +726,7 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
 
     def do_down(self, arg):
         if self.curindex + 1 == len(self.stack):
-            print >>self.stdout, '*** Newest frame'
+            print '*** Newest frame'
         else:
             self.curindex = self.curindex + 1
             self.curframe = self.stack[self.curindex][0]
@@ -767,12 +774,12 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
 
     def do_jump(self, arg):
         if self.curindex + 1 != len(self.stack):
-            print >>self.stdout, "*** You can only jump within the bottom frame"
+            print "*** You can only jump within the bottom frame"
             return
         try:
             arg = int(arg)
         except ValueError:
-            print >>self.stdout, "*** The 'jump' command requires a line number."
+            print "*** The 'jump' command requires a line number."
         else:
             try:
                 # Do the jump, fix up our copy of the stack, and display the
@@ -781,7 +788,7 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
                 self.stack[self.curindex] = self.stack[self.curindex][0], arg
                 self.print_stack_entry(self.stack[self.curindex])
             except ValueError, e:
-                print >>self.stdout, '*** Jump failed:', e
+                print '*** Jump failed:', e
     do_j = do_jump
 
     def do_debug(self, arg):
@@ -790,9 +797,9 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
         locals = self.curframe_locals
         p = Pdb(self.completekey, self.stdin, self.stdout)
         p.prompt = "(%s) " % self.prompt.strip()
-        print >>self.stdout, "ENTERING RECURSIVE DEBUGGER"
+        print "ENTERING RECURSIVE DEBUGGER"
         sys.call_tracing(p.run, (arg, globals, locals))
-        print >>self.stdout, "LEAVING RECURSIVE DEBUGGER"
+        print "LEAVING RECURSIVE DEBUGGER"
         sys.settrace(self.trace_dispatch)
         self.lastcmd = p.lastcmd
 
@@ -818,16 +825,16 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
         if co.co_flags & 8: n = n+1
         for i in range(n):
             name = co.co_varnames[i]
-            print >>self.stdout, name, '=',
-            if name in dict: print >>self.stdout, dict[name]
-            else: print >>self.stdout, "*** undefined ***"
+            print name, '=',
+            if name in dict: print dict[name]
+            else: print "*** undefined ***"
     do_a = do_args
 
     def do_retval(self, arg):
         if '__return__' in self.curframe_locals:
-            print >>self.stdout, self.curframe_locals['__return__']
+            print self.curframe_locals['__return__']
         else:
-            print >>self.stdout, '*** Not yet returned!'
+            print '*** Not yet returned!'
     do_rv = do_retval
 
     def _getval(self, arg):
@@ -839,12 +846,12 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
             if isinstance(t, str):
                 exc_type_name = t
             else: exc_type_name = t.__name__
-            print >>self.stdout, '***', exc_type_name + ':', repr(v)
+            print '***', exc_type_name + ':', repr(v)
             raise
 
     def do_p(self, arg):
         try:
-            print >>self.stdout, repr(self._getval(arg))
+            print repr(self._getval(arg))
         except:
             pass
 
@@ -870,7 +877,7 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
                 else:
                     first = max(1, int(x) - 5)
             except:
-                print >>self.stdout, '*** Error in argument:', repr(arg)
+                print '*** Error in argument:', repr(arg)
                 return
         elif self.lineno is None:
             first = max(1, self.curframe.f_lineno - 5)
@@ -885,7 +892,7 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
                 line = linecache.getline(filename, lineno,
                                          self.curframe.f_globals)
                 if not line:
-                    print >>self.stdout, '[EOF]'
+                    print '[EOF]'
                     break
                 else:
                     s = repr(lineno).rjust(3)
@@ -894,7 +901,7 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
                     else: s = s + ' '
                     if lineno == self.curframe.f_lineno:
                         s = s + '->'
-                    print >>self.stdout, s + '\t' + line,
+                    print s + '\t' + line,
                     self.lineno = lineno
         except KeyboardInterrupt:
             pass
@@ -909,23 +916,23 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
             if type(t) == type(''):
                 exc_type_name = t
             else: exc_type_name = t.__name__
-            print >>self.stdout, '***', exc_type_name + ':', repr(v)
+            print '***', exc_type_name + ':', repr(v)
             return
         code = None
         # Is it a function?
         try: code = value.func_code
         except: pass
         if code:
-            print >>self.stdout, 'Function', code.co_name
+            print 'Function', code.co_name
             return
         # Is it an instance method?
         try: code = value.im_func.func_code
         except: pass
         if code:
-            print >>self.stdout, 'Method', code.co_name
+            print 'Method', code.co_name
             return
         # None of the above...
-        print >>self.stdout, type(value)
+        print type(value)
 
     def do_alias(self, arg):
         args = arg.split()
@@ -933,10 +940,10 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
             keys = self.aliases.keys()
             keys.sort()
             for alias in keys:
-                print >>self.stdout, "%s = %s" % (alias, self.aliases[alias])
+                print "%s = %s" % (alias, self.aliases[alias])
             return
         if args[0] in self.aliases and len(args) == 1:
-            print >>self.stdout, "%s = %s" % (args[0], self.aliases[args[0]])
+            print "%s = %s" % (args[0], self.aliases[args[0]])
         else:
             self.aliases[args[0]] = ' '.join(args[1:])
 
@@ -1016,50 +1023,4 @@ class TestPdb(bdb.Bdb, cmd.Cmd):
         self._user_requested_quit = 0
         statement = 'execfile(%r)' % filename
         self.run(statement)
-
-# Simplified interface
-
-def run(statement, globals=None, locals=None):
-    Pdb().run(statement, globals, locals)
-
-def runeval(expression, globals=None, locals=None):
-    return Pdb().runeval(expression, globals, locals)
-
-def runctx(statement, globals, locals):
-    # B/W compatibility
-    run(statement, globals, locals)
-
-def runcall(*args, **kwds):
-    return Pdb().runcall(*args, **kwds)
-
-def set_trace():
-    Pdb().set_trace(sys._getframe().f_back)
-
-# Post-Mortem interface
-
-def post_mortem(t=None):
-    # handling the default
-    if t is None:
-        # sys.exc_info() returns (type, value, traceback) if an exception is
-        # being handled, otherwise it returns None
-        t = sys.exc_info()[2]
-        if t is None:
-            raise ValueError("A valid traceback must be passed if no "
-                                               "exception is being handled")
-
-    p = Pdb()
-    p.reset()
-    p.interaction(None, t)
-
-def pm():
-    post_mortem(sys.last_traceback)
-
-
-# Main program for testing
-
-TESTCMD = 'import x; x.main()'
-
-def test():
-    run(TESTCMD)
-
 

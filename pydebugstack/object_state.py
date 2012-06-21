@@ -19,13 +19,18 @@ class ObjectState():
         # Save the current call stack just within the object
         self.call_stack.append(func_name)
 
-        # Detect if there have been changes to the attributes between the call
-        new_val_obj = self.create_obj_attr_dict(local_vars['self'])
-        if (self.last_val_obj != None) and (self.last_val_obj != new_val_obj):
-            self.call_trace.append({
-                'type': 'attr_change',
-                'vals': self.changes_between_dict(self.last_val_obj, new_val_obj),
-            })
+        # Only check for differences if we one level into object
+        if len(self.call_stack) == 1:
+            # Detect if there have been changes to the attributes between the call
+            new_val_obj = self.create_obj_attr_dict(local_vars['self'])
+            if (self.last_val_obj != None) and (self.last_val_obj != new_val_obj):
+                self.call_trace.append({
+                    'type': 'attr_change',
+                    'vals': self.changes_between_dict(self.last_val_obj, new_val_obj),
+                })
+        
+        # Save current state of object attributes
+        self.last_val_obj = self.create_obj_attr_dict(local_vars['self'])
 
         # Save current state of object attributes
         self.last_val_obj = self.create_obj_attr_dict(local_vars['self'])

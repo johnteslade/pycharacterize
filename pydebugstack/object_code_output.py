@@ -8,6 +8,8 @@ class ObjectCodeOutput():
 
         logging.info("Stack out = {}".format(object_state.call_trace))
 
+        logging.debug("Call stack = {}".format(object_state.call_trace))
+
         code_out = []
 
         code_out.append("""print "Starting execution of autogen test harness for {}" """.format(object_state.class_name))

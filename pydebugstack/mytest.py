@@ -43,6 +43,7 @@ class MyTest(MyTestBase):
         return 4
 
     def inc(self, val):
+        """ Inc func """
         self.b += val
     
     def inc_by_1(self):
