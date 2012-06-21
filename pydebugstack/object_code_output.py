@@ -94,7 +94,10 @@ class ObjectCodeOutput():
 
         for (k, v) in inputs.items(): 
             if self.can_print_var(v):
-                input_list.append("{}={}".format(k, v))
+                if type(v) == str:
+                    input_list.append("{}=\"{}\"".format(k, v))
+                else:
+                    input_list.append("{}={}".format(k, v))
             else:
                 var_int += 1
                 temp_obj_name = "temp_var_{}".format(var_int)
@@ -109,7 +112,7 @@ class ObjectCodeOutput():
     def can_print_var(self, var_in):
         """ Can the variable be printed and then reconstructed? """
         
-        return type(var_in) in [bool, int, list, set, dict]
+        return (var_in == None) or type(var_in) in [bool, str, int, list, set, dict]
 
 
 
