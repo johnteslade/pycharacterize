@@ -182,6 +182,9 @@ class TestPdb(bdb.Bdb):
     def set_class_to_watch(self, class_name):
         """ Sets the class name to watch for - as a string """
 
+        if type(class_name) == str:
+            raise Exception("Class name must be a class reference - not a string")
+
         # Save the class name
         self.objects_list.set_class_to_watch(str(class_name))
 
