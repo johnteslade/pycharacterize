@@ -11,15 +11,15 @@ import logging
 
 if __name__ == "__main__":
     
-    logging.basicConfig(level=logging.INFO)
-    #logging.basicConfig(level=logging.DEBUG)
+    #logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG)
 
     sys.path.insert(0, '/usr/share/yum-cli')
     import yummain
 
     pdb_obj = test_pdb.TestPdb()
    
-    pdb_obj.set_class_to_watch("yum.config.FloatOption")
+    pdb_obj.set_class_to_watch(yum.config.BoolOption)
 
 #    pdb_obj.do_runcall(yummain.user_main, ['info', 'firefox'], exit_code=True)
     pdb_obj.do_runcall(yummain.user_main, [], exit_code=True)
@@ -29,10 +29,6 @@ if __name__ == "__main__":
 
     print
     print "!!!!!!!!!!!!!!!!!!!----------------"
-    print
-
-    print pdb_obj.call_trace
-    
     print
 
     test_code = pdb_obj.output_test_code()
