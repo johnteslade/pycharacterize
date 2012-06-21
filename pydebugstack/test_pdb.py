@@ -103,6 +103,12 @@ class TestPdb(bdb.Bdb):
             self.runcall(*args, **kwds)
         except SystemExit:
             logging.debug("Caller raised SystemExit")
+        finally:
+            # Clear breaks
+            # This appears to be a bug in bdb - if they are not cleared they are still active in 
+            # the next instance of BDB
+            self.clear_all_breaks()
+
 
     # Override Bdb methods
 
