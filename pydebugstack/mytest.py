@@ -92,10 +92,10 @@ class MyTest4(MyTest):
 class AnObject():
     """ Generic class that can be passed around """
 
-    def __init__(self):
-        self.x = 1
-        self.y = 10
-        self.z = 100
+    def __init__(self, x=1, y=10, z=100):
+        self.x = x
+        self.y = y
+        self.z = z
 
 
 def manipulate_class(class_in):

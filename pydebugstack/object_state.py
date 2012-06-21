@@ -32,6 +32,8 @@ class ObjectState():
         # Save current state of object attributes
         self.last_val_obj = self.create_obj_attr_dict(local_vars['self'])
 
+        # Save current state of object attributes
+        self.last_val_obj = self.create_obj_attr_dict(local_vars['self'])
 
     def function_return(self, local_vars, func_name):
         """ A return from a function """
