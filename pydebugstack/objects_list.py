@@ -19,6 +19,8 @@ class ObjectsList():
         self.class_of_interest_ref = class_name
         self.object_state = ObjectState(class_name) # The object - TODO this needs to become a list
     
+        self.obj_id = None # id of object TODO remove when multiple are supported
+
     def is_of_interest(self, class_name, class_name_ref):
         """ Is this class one being watched? """
 
@@ -26,14 +28,28 @@ class ObjectsList():
         # Sometimes the intested class with be prefixed with __main__ depending on the calling env
         return (self.class_of_interest != None) and (class_name == self.class_of_interest or class_name == "__main__." + self.class_of_interest or (class_name_ref == self.class_of_interest_ref))
 
-
+        
     def function_call(self, local_vars, func_name):
         """ A call to a function """
+
+        logging.debug("Call from {}".format(id(local_vars['self'])))
+
+        if self.obj_id == None:
+            self.obj_id = id(local_vars['self'])
+        else:
+            assert(self.obj_id == id(local_vars['self']))
 
         self.object_state.function_call(local_vars, func_name)
 
     def function_return(self, local_vars, func_name):
         """ A return from a function """
+        
+        logging.debug("Return from {}".format(id(local_vars['self'])))
+
+        if self.obj_id == None:
+            self.obj_id = id(local_vars['self'])
+        else:
+            assert(self.obj_id == id(local_vars['self']))
 
         self.object_state.function_return(local_vars, func_name)
 
