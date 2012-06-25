@@ -98,9 +98,15 @@ class ObjectCodeOutput():
         return ", ".join([ "{}={}".format(k, self.print_var(v)) for (k, v) in inputs.items() ])
 
 
-    def print_var(self, var_in):
+    def print_var(self, var_in, depth=1):
         """ Function returns string representation of object so it can be reconstructed """
-        
+       
+        print "depth = {}".format(depth)
+
+        if depth > 10:
+            print "Too deep"
+            return "None"
+
         # Basic type
         if (var_in == None) or (type(var_in) in [bool, int]):
             return "{}".format(var_in)
@@ -109,19 +115,19 @@ class ObjectCodeOutput():
             return "'{}'".format(var_in)
         # List
         elif type(var_in) == list:
-            converted_items = [ self.print_var(x) for x in var_in ]
+            converted_items = [ self.print_var(x, depth + 1) for x in var_in ]
             return "[" + ", ".join(converted_items) + "]"
         # Dictionary
         elif type(var_in) == dict:
-            converted_items = [ "'{}': {}".format(k, self.print_var(v)) for k, v in var_in.items() ]
+            converted_items = [ "'{}': {}".format(k, self.print_var(v, depth + 1)) for k, v in var_in.items() ]
             return "{" + ", ".join(converted_items) + "}"
         # Tuples
         elif type(var_in) == tuple:
-            converted_items = [ self.print_var(x) for x in var_in ]
+            converted_items = [ self.print_var(x, depth + 1) for x in var_in ]
             return "(" + ", ".join(converted_items) + ")"
         # Object - TODO not sure if this the best way to determine it
         elif hasattr(var_in, "__dict__"):
-            return "object_factory({}.{}, {})".format(var_in.__class__.__module__, var_in.__class__.__name__, self.print_var(var_in.__dict__))
+            return "object_factory({}.{}, {})".format(var_in.__class__.__module__, var_in.__class__.__name__, self.print_var(var_in.__dict__, depth + 1))
         # An unknown variable
         else:
             return "None"
