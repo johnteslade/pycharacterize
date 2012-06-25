@@ -102,8 +102,11 @@ class ObjectCodeOutput():
         """ Function returns string representation of object so it can be reconstructed """
         
         # Basic type
-        if (var_in == None) or (type(var_in) in [bool, int, str]):
+        if (var_in == None) or (type(var_in) in [bool, int]):
             return "{}".format(var_in)
+        # String (special behaviour to escape)
+        elif type(var_in) == str:
+            return "'{}'".format(var_in)
         # List
         elif type(var_in) == list:
             converted_items = [ self.print_var(x) for x in var_in ]
