@@ -1,4 +1,5 @@
 import logging
+import re
 
 class ObjectCodeOutput():
     """ Class to handle the outputting of code for the object """
@@ -10,8 +11,10 @@ class ObjectCodeOutput():
 
         logging.debug("Call stack = {}".format(object_state.call_trace))
 
-        code_out = []
+        test_case_name = "Test_" + object_state.class_name.replace(".", "_")
 
+        code_out = []
+        
         code_out.append("""print "Starting execution of autogen test harness for {}" """.format(object_state.class_name))
         code_out.append("")
         code_out.append("from object_factory import object_factory")
@@ -56,9 +59,9 @@ class ObjectCodeOutput():
                         # Determine best method for comparison
                         # TODO more complex types will need different comparison types
                         if hasattr(call['return'], "__dict__"):                        
-                            code_out.append("assert(ret.__dict__ == expected_return.__dict__)")
+                            code_out.append("self.assertEqual(ret.__dict__, expected_return.__dict__)")
                         else:
-                            code_out.append("assert(ret == expected_return)")
+                            code_out.append("self.assertEqual(ret, expected_return)")
 
                     else:
                         code_out.append("obj_var.{}({})".format(call['func'], func_inputs))
@@ -68,7 +71,25 @@ class ObjectCodeOutput():
         code_out.append("""print "Done with execution of autogen test harness for {}" """.format(object_state.class_name))
         code_out.append("") 
 
-        return "\n".join(code_out)
+        pre_code = []
+        post_code = []
+        
+        # Define the initial code
+        pre_code.append("import unittest")
+        pre_code.append("") 
+        pre_code.append("class {}(unittest.TestCase):".format(test_case_name))
+        pre_code.append("   ") 
+        pre_code.append("   def test_MyTest(self):")
+        pre_code.append("   ") 
+
+        # Code at end of code
+        post_code.append("suite = unittest.TestLoader().loadTestsFromTestCase({})".format(test_case_name))
+        post_code.append("unittest.TextTestRunner(verbosity=2).run(suite)")
+
+        # Define the final output
+        final_code_out = pre_code + [ "     " + line for line in code_out ] + post_code     
+
+        return "\n".join(final_code_out)
 
 
     def format_input_text(self, inputs):
