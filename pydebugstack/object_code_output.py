@@ -113,6 +113,15 @@ class ObjectCodeOutput():
         # String (special behaviour to escape)
         elif type(var_in) == str:
             return "'{}'".format(var_in)
+        # Is this a type
+        elif type(var_in) == type:
+            class_match = re.match("^<class '(.*)'>$", str(var_in))
+            if class_match: 
+                return class_match.group(1)
+            else:
+                print "Unknown type - {}".format(type(var_in))
+                return "UNKNOWN_TYPE({} {})".format(var_in, type(var_in))
+
         # List
         elif type(var_in) == list:
             converted_items = [ self.print_var(x, depth + 1) for x in var_in ]
