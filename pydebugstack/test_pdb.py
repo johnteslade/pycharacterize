@@ -224,7 +224,8 @@ class TestPdb(bdb.Bdb):
             attr = getattr(class_name, attr_name)
 
             # If a function then save
-            if 'im_func' in dir(attr):
+            if 'im_func' in dir(attr) and (attr.func_code.co_name.startswith("__") or not(attr.func_code.co_name.startswith("_"))):
+
                 func_details.append({'name': attr.func_code.co_name, 'line': attr.func_code.co_firstlineno, 'filename': attr.func_code.co_filename})
 
         return func_details
@@ -249,8 +250,6 @@ class TestPdb(bdb.Bdb):
             class_name = local_vars['self'].__class__.__module__ + "." + local_vars['self'].__class__.__name__ 
 
             #logging.debug("Mod = {}, Class = {}".format(local_vars['self'].__class__.__module__, local_vars['self'].__class__.__name__))
-            
-
 
             #logging.debug("Class = {}, Func = {}, call = {}, return = {}".format(class_name, self.stack[self.curindex][0].f_code.co_name, func_call, func_return))
 
