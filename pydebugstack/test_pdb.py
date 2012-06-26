@@ -262,7 +262,7 @@ class TestPdb(bdb.Bdb):
             # Class we are interested in? 
             if self.objects_list.is_of_interest(class_name, local_vars['self'].__class__):
             
-                logging.debug("OF iterstest --- Class = {}, Func = {}, call = {}, return = {}".format(class_name, self.stack[self.curindex][0].f_code.co_name, func_call, func_return))
+                logging.debug("Of interest --- Class = {}, Func = {}, call = {}, return = {}".format(class_name, self.stack[self.curindex][0].f_code.co_name, func_call, func_return))
             
                 if func_call:
                     self.objects_list.function_call(local_vars, self.stack[self.curindex][0].f_code.co_name)
