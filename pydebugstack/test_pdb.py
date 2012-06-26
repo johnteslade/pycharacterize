@@ -208,7 +208,7 @@ class TestPdb(bdb.Bdb):
                 print '***', err
             else:
                 bp = self.get_breaks(funcs['filename'], funcs['line'])[-1]
-                print "Breakpoint %d at %s:%d" % (bp.number, bp.file, bp.line)
+                print "Breakpoint %d at %s:%d - for func %s" % (bp.number, bp.file, bp.line, funcs['name'])
 
         print "now {} breaks".format(self.get_all_breaks())
 
@@ -294,6 +294,9 @@ class TestPdb(bdb.Bdb):
         return self.objects_list.output_test_code()
  
 
+    def output_test_code_annotated(self):
+
+        return self.objects_list.output_test_code_annotated()
     
 
         

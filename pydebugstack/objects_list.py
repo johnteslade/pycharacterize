@@ -56,6 +56,8 @@ class ObjectsList():
     def output_test_code(self):
         return ObjectCodeOutput().output_test_code(self.object_state)
 
+    def output_test_code_annotated(self):
+        return ObjectCodeOutput().output_test_code_annotated(self.object_state)
 
     def call_outstanding(self):
         """ Are we still inside a call? """

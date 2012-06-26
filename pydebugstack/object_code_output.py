@@ -6,6 +6,23 @@ class ObjectCodeOutput():
 
     def output_test_code(self, object_state):
         """ Returns the code for the test harness """
+        
+        return "\n".join(self.output_test_code_list(object_state))
+
+
+    def output_test_code_annotated(self, object_state):
+        """ Returns the code for the test harness with annotations """
+        
+        code_lines = self.output_test_code_list(object_state)
+
+        for i in xrange(len(code_lines)):
+            code_lines[i] = ("%03d:" % i) + code_lines[i]
+
+        return "\n".join(code_lines)
+
+
+    def output_test_code_list(self, object_state):
+        """ Returns the code as a list for the test harness """
 
         logging.info("Stack out = {}".format(object_state.call_trace))
 
@@ -87,9 +104,8 @@ class ObjectCodeOutput():
         post_code.append("unittest.TextTestRunner(verbosity=2).run(suite)")
 
         # Define the final output
-        final_code_out = pre_code + [ "     " + line for line in code_out ] + post_code     
+        return pre_code + [ "     " + line for line in code_out ] + post_code     
 
-        return "\n".join(final_code_out)
 
 
     def format_input_text(self, inputs):
