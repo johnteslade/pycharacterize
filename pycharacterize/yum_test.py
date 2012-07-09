@@ -1,8 +1,7 @@
 import bdb
 import sys
 import linecache
-import test_pdb
-import mytest
+import pycharacterize 
 import yum
 import logging
 
@@ -17,7 +16,7 @@ if __name__ == "__main__":
     sys.path.insert(0, '/usr/share/yum-cli')
     import yummain
 
-    pdb_obj = test_pdb.TestPdb()
+    pdb_obj = pycharacterize.runner.TestPdb()
    
     pdb_obj.set_class_to_watch(yum.config.BoolOption, "yum.config.BoolOption")
 
