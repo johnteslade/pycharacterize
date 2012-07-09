@@ -3,7 +3,12 @@ import unittest
 import bdb
 import sys
 import linecache
-import __init__ as pycharacterize
+
+# Modify paths so import pycharacterize works
+sys.path.append("../")
+sys.path.append(".")
+
+import pycharacterize
 import logging
 
 

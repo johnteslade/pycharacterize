@@ -35,7 +35,7 @@ class ObjectCodeOutput():
         
         code_out.append("""print "Starting execution of autogen test harness for {}" """.format(object_state.class_name))
         code_out.append("")
-        code_out.append("from object_factory import object_factory")
+        code_out.append("from pycharacterize.object_factory import object_factory")
         code_out.append("")
 
         # Create obj if we have no explict __init__call
