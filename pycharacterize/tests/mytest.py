@@ -122,6 +122,21 @@ def manipulate_class(class_in):
     out = test_obj.equal()
     print "manipulate_class: {}".format(out)
 
+
+
+def manipulate_class_double(class_in):
+    """ This function manipulates two instances of the class """
+
+    # Call standard method
+    manipulate_class(class_in)
+
+    # Now run some other stuff
+    test_obj = class_in()
+    out = test_obj.equal()
+    test_obj.inc(1000)
+    out = test_obj.equal()
+
     exit()
+
 
 
