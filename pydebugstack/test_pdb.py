@@ -297,6 +297,13 @@ class TestPdb(bdb.Bdb):
 
         return self.objects_list.output_test_code_annotated()
     
+ 
+    def output_test_code_to_file(self, filename):
+
+        fw = open(filename, 'w')
+        fw.write(self.objects_list.output_test_code())
+        fw.close()
+
 
         
 

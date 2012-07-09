@@ -29,6 +29,7 @@ if __name__ == "__main__":
     test_code = pdb_obj.output_test_code()
     print test_code
 
+    pdb_obj.output_test_code_to_file("test_MyTest4.py")
 
     print
     print "!!!!!!!!!!!!!!!!!!! RUNNING THE AUTOGEN ----------------"
