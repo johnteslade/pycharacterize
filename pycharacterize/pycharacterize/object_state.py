@@ -5,14 +5,15 @@ import logging
 class ObjectState():
     """ Class to hold the state of an object """
 
-    def __init__(self, class_name):
+    def __init__(self, class_name, id_in):
         """ Init """ 
 
         self.call_trace = [] # The trace of calls in the class of interest
         self.last_val_obj = None # Stores a copy of the attributes of the object when we last were executing a method 
         self.call_stack = [] # Current call stack in the object of iterest
         self.class_name = class_name # Name of class being watched - TODO assert this is correct on calls
-
+        self.id = id_in # The id of this object being represented
+        
 
     def function_call(self, local_vars, func_name):
         """ A call to a function """

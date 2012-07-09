@@ -5,31 +5,57 @@ import jsonpickle
 class ObjectCodeOutput():
     """ Class to handle the outputting of code for the object """
 
-    def output_test_code(self, object_state):
+    def output_test_code(self, object_state_list):
         """ Returns the code for the test harness """
         
-        return "\n".join(self.output_test_code_list(object_state))
+        return "\n".join(self.output_test_code_list(object_state_list))
 
 
     def output_test_code_annotated(self, object_state):
         """ Returns the code for the test harness with annotations """
         
-        code_lines = self.output_test_code_list(object_state)
+        code_lines = self.output_test_code_list(object_state_list)
 
         for i in xrange(len(code_lines)):
             code_lines[i] = ("%03d:" % i) + code_lines[i]
 
         return "\n".join(code_lines)
 
+    def output_test_code_list(self, object_state_list):
 
-    def output_test_code_list(self, object_state):
-        """ Returns the code as a list for the test harness """
+        logging.info("State list = {}".format(object_state_list))
+        logging.info("State list len = {}".format(len(object_state_list)))
+
+        code_out = []
+        code_out = []
+        
+        test_case_name = "Test_{}".format(object_state_list[0].class_name.replace(".", "_"))
+
+        # Define the initial code
+        code_out.append("import unittest")
+        code_out.append("") 
+        code_out.append("class {}(unittest.TestCase):".format(test_case_name))
+        code_out.append("   ") 
+        
+        for x in xrange(len(object_state_list)):
+            code_out.append("   def test_MyTest_{}(self):".format(x + 1))
+            code_out.append("   ") 
+            code_out = code_out + [ "     " + line for line in self.output_test_code_single_test(object_state_list[x], x) ]
+
+        # Code at end of code
+        code_out.append("suite = unittest.TestLoader().loadTestsFromTestCase({})".format(test_case_name))
+        code_out.append("unittest.TextTestRunner(verbosity=2).run(suite)")
+
+        return code_out
+
+
+    def output_test_code_single_test(self, object_state, test_num):
+        """ Returns the code as a single test """
 
         logging.info("Stack out = {}".format(object_state.call_trace))
 
         logging.debug("Call stack = {}".format(object_state.call_trace))
 
-        test_case_name = "Test_" + object_state.class_name.replace(".", "_")
 
         code_out = []
         
@@ -89,24 +115,7 @@ class ObjectCodeOutput():
         code_out.append("""print "Done with execution of autogen test harness for {}" """.format(object_state.class_name))
         code_out.append("") 
 
-        pre_code = []
-        post_code = []
-        
-        # Define the initial code
-        pre_code.append("import unittest")
-        pre_code.append("") 
-        pre_code.append("class {}(unittest.TestCase):".format(test_case_name))
-        pre_code.append("   ") 
-        pre_code.append("   def test_MyTest(self):")
-        pre_code.append("   ") 
-
-        # Code at end of code
-        post_code.append("suite = unittest.TestLoader().loadTestsFromTestCase({})".format(test_case_name))
-        post_code.append("unittest.TextTestRunner(verbosity=2).run(suite)")
-
-        # Define the final output
-        return pre_code + [ "     " + line for line in code_out ] + post_code     
-
+        return code_out
 
 
     def format_input_text(self, inputs):
