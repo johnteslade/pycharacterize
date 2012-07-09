@@ -3,7 +3,7 @@ import unittest
 import bdb
 import sys
 import linecache
-import test_pdb
+import __init__ as pycharacterize
 import logging
 
 
@@ -15,7 +15,7 @@ class Test_test_Pdb(unittest.TestCase):
     def manipulate_given_class(self, class_to_test, class_to_test_str):
         """ Tests the given class using manipulate_class() """
 
-        pdb_obj = test_pdb.TestPdb()
+        pdb_obj = pycharacterize.TestPdb()
         pdb_obj.set_class_to_watch(class_to_test, class_to_test_str)
         pdb_obj.do_runcall(mytest.manipulate_class, class_to_test)
 

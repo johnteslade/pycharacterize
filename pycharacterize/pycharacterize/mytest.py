@@ -2,7 +2,6 @@ import unittest
 import bdb
 import sys
 import linecache
-import test_pdb
 import logging
 
 class MyTestBase(object):

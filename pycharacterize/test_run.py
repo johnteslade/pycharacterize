@@ -1,7 +1,7 @@
 import bdb
 import sys
 import linecache
-import test_pdb
+import pycharacterize
 import mytest
 import logging
 
@@ -10,7 +10,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     #logging.basicConfig(level=logging.INFO)
 
-    pdb_obj = test_pdb.TestPdb(step_all=False)
+    pdb_obj = pycharacterize.TestPdb(step_all=False)
 
     pdb_obj.set_class_to_watch(mytest.MyTest4, "mytest.MyTest4")
     pdb_obj.do_runcall(mytest.manipulate_class, mytest.MyTest4)
