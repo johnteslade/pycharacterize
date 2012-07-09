@@ -152,7 +152,7 @@ class ObjectCodeOutput():
             return "(" + ", ".join(converted_items) + ")"
         # Object - TODO not sure if this the best way to determine it
         elif hasattr(var_in, "__dict__"):
-            return "object_factory({}.{}, {})".format(var_in.__class__.__module__, var_in.__class__.__name__, self.print_var(var_in.__dict__, depth + 1))
+            return "object_factory('{}.{}', {})".format(var_in.__class__.__module__, var_in.__class__.__name__, self.print_var(var_in.__dict__, depth + 1))
         # An unknown variable
         else:
             return "None"
