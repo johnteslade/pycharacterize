@@ -32,6 +32,7 @@ class ObjectCodeOutput():
 
         # Define the initial code
         code_out.append("import unittest")
+        code_out.append("import {}".format(object_state_list[0].class_name.split(".")[0]))
         code_out.append("") 
         code_out.append("class {}(unittest.TestCase):".format(test_case_name))
         code_out.append("   ") 
