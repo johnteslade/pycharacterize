@@ -27,7 +27,6 @@ class ObjectCodeOutput():
         logging.info("State list len = {}".format(len(object_state_list)))
 
         code_out = []
-        code_out = []
         
         test_case_name = "Test_{}".format(object_state_list[0].class_name.replace(".", "_"))
 
