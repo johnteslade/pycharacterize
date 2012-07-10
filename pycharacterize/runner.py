@@ -293,15 +293,15 @@ class TestPdb(bdb.Bdb):
         return self.objects_list.output_test_code(**kwargs)
  
 
-    def output_test_code_annotated(self):
+    def output_test_code_annotated(self, **kwargs):
 
-        return self.objects_list.output_test_code_annotated()
+        return self.objects_list.output_test_code_annotated(**kwargs)
     
  
-    def output_test_code_to_file(self, filename):
+    def output_test_code_to_file(self, filename, **kwargs):
 
         fw = open(filename, 'w')
-        fw.write(self.objects_list.output_test_code())
+        fw.write(self.objects_list.output_test_code(**kwargs))
         fw.close()
 
 
