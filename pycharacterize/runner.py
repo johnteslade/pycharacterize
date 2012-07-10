@@ -109,6 +109,8 @@ class TestPdb(bdb.Bdb):
             # the next instance of BDB
             self.clear_all_breaks()
 
+            # Finish objects
+            self.objects_list.run_finished()
 
     # Override Bdb methods
 

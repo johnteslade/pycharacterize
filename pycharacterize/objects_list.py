@@ -27,6 +27,24 @@ class ObjectsList():
         return (self.class_of_interest != None) and (class_name == self.class_of_interest or class_name == "__main__." + self.class_of_interest or (class_name_ref == self.class_of_interest_ref))
 
     
+    def run_finished(self):
+        """ Called when the run as finished to clean up """
+
+        logging.debug("Run has finished")
+
+        self.remove_dups()
+
+
+    def remove_dups(self):
+        """ Remove duplicates from object lists """
+        for object_state in self.object_state_list:
+
+            logging.debug("State = {}".format(object_state.call_trace))
+
+            if len(filter(lambda x: x.call_trace == object_state.call_trace, self.object_state_list)) > 1:
+                print "Found a dupe"
+
+
     def _get_object_state(self, obj_id):
         """ Returns the object state of interest """
 
