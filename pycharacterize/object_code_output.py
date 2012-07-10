@@ -162,11 +162,21 @@ class ObjectCodeOutput():
             return "(" + ", ".join(converted_items) + ")"
         # Object - TODO not sure if this the best way to determine it
         elif hasattr(var_in, "__dict__"):
-            #return "object_factory('{}.{}', {})".format(var_in.__class__.__module__, var_in.__class__.__name__, self.print_var(var_in.__dict__, depth + 1))
-            return "object_factory(\"\"\"{}\"\"\")".format(jsonpickle.encode(var_in))
+            return self.create_object_factory_call(var_in)
         # An unknown variable
         else:
             return "None"
+
+    def create_object_factory_call(self, var_in):
+        """ Returns the string needed for an object_factory call """
+        
+        encoded_obj = jsonpickle.encode(var_in)
+        encode_obj = encoded_obj.replace("'", "\\'")
+        encode_obj = encoded_obj.replace('\\"', '\\\\"')
+        
+        return "object_factory(\"\"\"{}\"\"\")".format(encode_obj)
+
+
 
 if __name__ == "__main__":
     
