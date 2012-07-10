@@ -40,6 +40,7 @@ if __name__ == "__main__":
     print 
 
 
+    pdb_obj.output_test_code_to_file("testcases_yum.py")
 
     print
     print "!!!!!!!!!!!!!!!!!!! RUNNING THE AUTOGEN ----------------"
