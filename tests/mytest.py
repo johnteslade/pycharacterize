@@ -123,6 +123,15 @@ def manipulate_class(class_in):
     print "manipulate_class: {}".format(out)
 
 
+def manipulate_class_twice(class_in):
+    """ This function calls manipulation twice """
+
+    # Call standard method
+    manipulate_class(class_in)
+    manipulate_class(class_in)
+
+    exit()
+
 
 def manipulate_class_double(class_in):
     """ This function manipulates two instances of the class """
