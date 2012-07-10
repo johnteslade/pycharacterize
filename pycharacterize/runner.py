@@ -268,7 +268,7 @@ class TestPdb(bdb.Bdb):
 
                 # Save the details of the function call
                 if func_return:
-                    self.objects_list.function_return(local_vars, self.stack[self.curindex][0].f_code.co_name)
+                    self.objects_list.function_return(local_vars, self.stack[self.curindex][0].f_code.co_name, self.stack)
                  
 
         #logging.debug("")

@@ -39,7 +39,7 @@ class ObjectState():
         # Save current state of object attributes
         self.last_val_obj = self.create_obj_attr_dict(local_vars['self'])
 
-    def function_return(self, local_vars, func_name):
+    def function_return(self, local_vars, func_name, stack):
         """ A return from a function """
 
         # Take this func now off the stack
@@ -57,12 +57,18 @@ class ObjectState():
             inputs = local_vars.copy()
             del inputs['self']
             del inputs['__return__']
+            
+            back_trace = []
+
+            for (frame, lineno) in stack:
+                back_trace.append("f={}, func={}, l={}".format(frame.f_code.co_filename, frame.f_code.co_name, lineno))
 
             self.call_trace.append({
                 'type': 'func_call',
                 'func': func_name, 
                 'return': local_vars['__return__'],
                 'inputs': inputs,
+                'stack': back_trace,
             })
 
         # Save current state of object attributes
