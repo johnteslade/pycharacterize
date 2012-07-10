@@ -61,7 +61,7 @@ class ObjectState():
             back_trace = []
 
             for (frame, lineno) in stack:
-                back_trace.append("f={}, func={}, l={}".format(frame.f_code.co_filename, frame.f_code.co_name, lineno))
+                back_trace.append("{}() at {}:{}".format(frame.f_code.co_name, frame.f_code.co_filename, lineno))
 
             self.call_trace.append({
                 'type': 'func_call',
