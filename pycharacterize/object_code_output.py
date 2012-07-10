@@ -5,10 +5,10 @@ import jsonpickle
 class ObjectCodeOutput():
     """ Class to handle the outputting of code for the object """
 
-    def output_test_code(self, object_state_list):
+    def output_test_code(self, object_state_list, **kwarg):
         """ Returns the code for the test harness """
         
-        return "\n".join(self.output_test_code_list(object_state_list))
+        return "\n".join(self.output_test_code_list(object_state_list, **kwarg))
 
 
     def output_test_code_annotated(self, object_state):
@@ -21,7 +21,7 @@ class ObjectCodeOutput():
 
         return "\n".join(code_lines)
 
-    def output_test_code_list(self, object_state_list):
+    def output_test_code_list(self, object_state_list, **kwarg):
 
         logging.info("State list = {}".format(object_state_list))
         logging.info("State list len = {}".format(len(object_state_list)))
@@ -40,7 +40,7 @@ class ObjectCodeOutput():
         for x in xrange(len(object_state_list)):
             code_out.append("   def test_MyTest_{}(self):".format(x + 1))
             code_out.append("   ") 
-            code_out = code_out + [ "     " + line for line in self.output_test_code_single_test(object_state_list[x], x) ]
+            code_out = code_out + [ "     " + line for line in self.output_test_code_single_test(object_state_list[x], x, **kwarg) ]
 
         # Code at end of code
         code_out.append("suite = unittest.TestLoader().loadTestsFromTestCase({})".format(test_case_name))
@@ -49,7 +49,7 @@ class ObjectCodeOutput():
         return code_out
 
 
-    def output_test_code_single_test(self, object_state, test_num):
+    def output_test_code_single_test(self, object_state, test_num, **kwarg):
         """ Returns the code as a single test """
 
         logging.info("Stack out = {}".format(object_state.call_trace))
@@ -93,7 +93,12 @@ class ObjectCodeOutput():
                 # Function call
                 else:
                     code_out.append("# Call to {}".format(call['func']))
-               
+              
+                    if 'backtrace' in kwarg and kwarg['backtrace'] == True:
+                        for stack in call['stack'][:-1]: 
+                            code_out.append("# Backtrace: {}".format(stack))
+              
+
                     func_inputs = self.format_input_text(call['inputs']) 
 
                     if call['return'] != None:

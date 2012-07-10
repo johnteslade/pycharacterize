@@ -27,7 +27,7 @@ if __name__ == "__main__":
     print "!!!!!!!!!!!!!!!!!!!----------------"
     print
 
-    test_code = pdb_obj.output_test_code()
+    test_code = pdb_obj.output_test_code(backtrace=True)
     print test_code
 
     pdb_obj.output_test_code_to_file("test_MyTest4.py")

@@ -56,8 +56,8 @@ class ObjectsList():
         self._get_object_state(id(local_vars['self'])).function_return(local_vars, func_name, stack)
 
 
-    def output_test_code(self):
-        return ObjectCodeOutput().output_test_code(self.object_state_list)
+    def output_test_code(self, **kwarg):
+        return ObjectCodeOutput().output_test_code(self.object_state_list, **kwarg)
 
 
     def output_test_code_annotated(self):

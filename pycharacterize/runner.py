@@ -288,9 +288,9 @@ class TestPdb(bdb.Bdb):
         self.forget()
 
     
-    def output_test_code(self):
+    def output_test_code(self, **kwargs):
 
-        return self.objects_list.output_test_code()
+        return self.objects_list.output_test_code(**kwargs)
  
 
     def output_test_code_annotated(self):
