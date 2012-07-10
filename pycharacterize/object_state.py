@@ -23,6 +23,7 @@ class ObjectState():
 
         logging.debug("call_stack = {}".format(self.call_stack))
 
+
         # Only check for differences if we one level into object
         if len(self.call_stack) == 1:
             # Detect if there have been changes to the attributes between the call
@@ -51,7 +52,7 @@ class ObjectState():
         assert (return_func == func_name)
 
         # If we have a call stack then this was a call originiating inside the object so ignore it
-        if len(self.call_stack) == 0:
+        if len(self.call_stack) == 0 and func_name not in ['__get__', '__set__']:
         
             # Get the actual params passed in
             inputs = local_vars.copy()
