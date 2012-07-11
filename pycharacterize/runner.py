@@ -43,16 +43,6 @@ class TestPdb(bdb.Bdb):
 
         self.step_all = step_all # Should we step through all execution
 
-        self.commands = {} # associates a command list to breakpoint numbers
-        self.commands_doprompt = {} # for each bp num, tells if the prompt
-                                    # must be disp. after execing the cmd list
-        self.commands_silent = {} # for each bp num, tells if the stack trace
-                                  # must be disp. after execing the cmd list
-        self.commands_defining = False # True while in the process of defining
-                                       # a command list
-        self.commands_bnum = None # The breakpoint number for which we are
-                                  # defining a list
-
         self.class_of_interest = None # Class name we are interested in
         self.all_calls = defaultdict(lambda: defaultdict(int)) # All functions calls found
         self.class_counts = defaultdict(int) # Counts methods in each class found
@@ -117,33 +107,8 @@ class TestPdb(bdb.Bdb):
                 or frame.f_lineno<= 0):
                 return
             self._wait_for_mainpyfile = 0
-        if self.bp_commands(frame):
-            logging.debug("Line {} {}".format(frame.f_code.co_filename, frame.f_lineno))
-            self.interaction(frame, None, func_call=(not self.step_all))
-
-    def bp_commands(self,frame):
-        """Call every command that was set for the current active breakpoint
-        (if there is one).
-
-        Returns True if the normal interaction function must be called,
-        False otherwise."""
-        # self.currentbp is set in bdb in Bdb.break_here if a breakpoint was hit
-        if getattr(self, "currentbp", False) and \
-               self.currentbp in self.commands:
-            currentbp = self.currentbp
-            self.currentbp = 0
-            lastcmd_back = self.lastcmd
-            self.setup(frame, None)
-            for line in self.commands[currentbp]:
-                self.onecmd(line)
-            self.lastcmd = lastcmd_back
-            if not self.commands_silent[currentbp]:
-                self.print_stack_entry(self.stack[self.curindex])
-            if self.commands_doprompt[currentbp]:
-                self.cmdloop()
-            self.forget()
-            return
-        return 1
+        logging.debug("Line {} {}".format(frame.f_code.co_filename, frame.f_lineno))
+        self.interaction(frame, None, func_call=(not self.step_all))
 
     def user_return(self, frame, return_value):
         """This function is called when a return trap is set here."""
