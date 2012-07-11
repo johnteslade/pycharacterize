@@ -250,15 +250,3 @@ class TestPdb(bdb.Bdb):
         fw.write(self.objects_list.output_test_code(**kwargs))
         fw.close()
 
-    def _getval(self, arg):
-        try:
-            return eval(arg, self.curframe.f_globals,
-                        self.curframe_locals)
-        except:
-            t, v = sys.exc_info()[:2]
-            if isinstance(t, str):
-                exc_type_name = t
-            else: exc_type_name = t.__name__
-            print '***', exc_type_name + ':', repr(v)
-            raise
-
