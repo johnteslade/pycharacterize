@@ -1,22 +1,22 @@
-#! /usr/bin/env python
+"""Main runner code"""
 
-"""A Python debugger."""
+"""This is a modified version of PDB - and under the same license """
 
-# (See pdb.doc for documentation.)
-
-import sys
-import linecache
-import cmd
 import bdb
-from repr import Repr
-import os
-import re
-import pprint
-import traceback
+import cmd
 import inspect
-from collections import defaultdict
+import linecache
 import logging
+import os
+import pprint
+import re
+import sys
+
+from collections import defaultdict
+from repr import Repr
+
 from objects_list import ObjectsList
+
 
 
 # Create a custom safe Repr instance and increase its maxstring.
