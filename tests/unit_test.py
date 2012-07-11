@@ -17,10 +17,10 @@ class Test_test_Pdb(unittest.TestCase):
     def setUp(self):
         pass
 
-    def manipulate_given_class(self, class_to_test, class_to_test_str, manipulate_func=mytest.manipulate_class):
+    def manipulate_given_class(self, class_to_test, class_to_test_str, manipulate_func=mytest.manipulate_class, step_all=False):
         """ Tests the given class using manipulate_class() """
 
-        pdb_obj = pycharacterize.TestPdb()
+        pdb_obj = pycharacterize.TestPdb(step_all=step_all)
         pdb_obj.set_class_to_watch(class_to_test, class_to_test_str)
         pdb_obj.do_runcall(manipulate_func, class_to_test)
 
@@ -54,6 +54,11 @@ class Test_test_Pdb(unittest.TestCase):
     def test_MyTest4_double(self):
 
         self.manipulate_given_class(mytest.MyTest4, "mytest.MyTest4", mytest.manipulate_class_double)
+
+    def test_MyTest_steapall(self):
+        
+        self.manipulate_given_class(mytest.MyTest, "mytest.MyTest", step_all=True)
+
 
 if __name__ == '__main__':
     
