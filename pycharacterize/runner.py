@@ -31,15 +31,7 @@ class TestPdb(bdb.Bdb):
     def __init__(self, completekey='tab', skip=None, step_all=False):
         bdb.Bdb.__init__(self, skip=skip)
         
-        self.prompt = '(Pdb) '
-        self.aliases = {}
-        self.mainpyfile = ''
         self._wait_for_mainpyfile = 0
-        # Try to load readline if it exists
-        try:
-            import readline
-        except ImportError:
-            pass
 
         self.step_all = step_all # Should we step through all execution
 
@@ -103,8 +95,7 @@ class TestPdb(bdb.Bdb):
     def user_line(self, frame):
         """This function is called when we stop or break at this line."""
         if self._wait_for_mainpyfile:
-            if (self.mainpyfile != self.canonic(frame.f_code.co_filename)
-                or frame.f_lineno<= 0):
+            if frame.f_lineno<= 0:
                 return
             self._wait_for_mainpyfile = 0
         logging.debug("Line {} {}".format(frame.f_code.co_filename, frame.f_lineno))
