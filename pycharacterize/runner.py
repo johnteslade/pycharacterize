@@ -123,7 +123,6 @@ class TestPdb(bdb.Bdb):
         logging.debug(exc_type_name + ':' + _saferepr(exc_value))
         self.interaction(frame, exc_traceback)
 
-    # General interaction function
 
     def set_class_to_watch(self, class_name, class_name_str):
         """ Sets the class name to watch for - as a string """
@@ -178,6 +177,7 @@ class TestPdb(bdb.Bdb):
 
 
     def interaction(self, frame, traceback, func_call=False, func_return=False):
+        """ Called when there is an interaction to deal with """
 
         self.setup(frame, traceback)
         #self.print_stack_entry(self.stack[self.curindex])
@@ -235,6 +235,7 @@ class TestPdb(bdb.Bdb):
 
     
     def output_test_code(self, **kwargs):
+        """ Output the test code """
 
         return self.objects_list.output_test_code(**kwargs)
  
