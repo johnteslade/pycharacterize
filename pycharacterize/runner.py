@@ -163,6 +163,7 @@ class TestPdb(bdb.Bdb):
         if type(exc_type) == type(''):
             exc_type_name = exc_type
         else: exc_type_name = exc_type.__name__
+        logging.debug("user_exception")
         logging.debug(exc_type_name + ':' + _saferepr(exc_value))
         self.interaction(frame, exc_traceback)
 
@@ -265,14 +266,14 @@ class TestPdb(bdb.Bdb):
 
         # Determine the step mode
         if self.step_all:
-            self.do_step(None)
+            self.set_step()
         else:
             # If we entered a function then wait for return
             if self.objects_list.call_outstanding():
                 logging.debug("Call outstanding - do return")
-                self.do_return(None)
+                self.set_return(self.curframe)
             else:
-                self.do_continue(None)
+                self.set_continue()
 
         self.forget()
 
@@ -292,22 +293,6 @@ class TestPdb(bdb.Bdb):
         fw = open(filename, 'w')
         fw.write(self.objects_list.output_test_code(**kwargs))
         fw.close()
-
-
-        
-
-
-    def do_step(self, arg):
-        self.set_step()
-        return 1
-
-    def do_return(self, arg):
-        self.set_return(self.curframe)
-        return 1
-
-    def do_continue(self, arg):
-        self.set_continue()
-        return 1
 
     def _getval(self, arg):
         try:
