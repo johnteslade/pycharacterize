@@ -98,7 +98,7 @@ class ObjectCodeOutput():
                     code_out.append("# Call to {}".format(call['func']))
               
                     if 'backtrace' in kwarg and kwarg['backtrace'] == True:
-                        for stack in call['stack'][:-1]: 
+                        for stack in call['stack'][1:-1]: 
                             code_out.append("# Backtrace: {}".format(stack))
               
 
