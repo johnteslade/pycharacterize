@@ -174,12 +174,17 @@ class ObjectCodeOutput():
 
     def create_object_factory_call(self, var_in):
         """ Returns the string needed for an object_factory call """
+       
+        # Pickle the object - set the options to intent lines
+        p = jsonpickle.JSONPluginMgr() 
+        p.set_encoder_options('simplejson', sort_keys=True, indent=4)
+        j = jsonpickle.pickler.Pickler()
+        encoded_obj = p.encode(j.flatten(var_in))
         
-        encoded_obj = jsonpickle.encode(var_in)
-        encode_obj = encoded_obj.replace("'", "\\'")
-        encode_obj = encoded_obj.replace('\\"', '\\\\"')
+        encoded_obj = encoded_obj.replace("'", "\\'")
+        encoded_obj = encoded_obj.replace('\\"', '\\\\"')
         
-        return "object_factory(\"\"\"{}\"\"\")".format(encode_obj)
+        return "object_factory(\"\"\"{}\"\"\")".format(encoded_obj)
 
 
 
