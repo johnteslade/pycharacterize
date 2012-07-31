@@ -5,6 +5,9 @@ import jsonpickle
 class ObjectCodeOutput():
     """ Class to handle the outputting of code for the object """
 
+    INDENT_SIZE = 4 # Number of spaces to indent
+    INDENT_STRING = (" " * INDENT_SIZE) # A string for one indent
+
     def output_test_code(self, object_state_list, **kwarg):
         """ Returns the code for the test harness """
         
@@ -35,12 +38,12 @@ class ObjectCodeOutput():
         code_out.append("import {}".format(object_state_list[0].class_name.split(".")[0]))
         code_out.append("") 
         code_out.append("class {}(unittest.TestCase):".format(test_case_name))
-        code_out.append("   ") 
+        code_out.append(self.INDENT_STRING) 
         
         for x in xrange(len(object_state_list)):
-            code_out.append("   def test_MyTest_{}(self):".format(x + 1))
-            code_out.append("   ") 
-            code_out = code_out + [ "     " + line for line in self.output_test_code_single_test(object_state_list[x], x, **kwarg) ]
+            code_out.append(self.INDENT_STRING + "def test_MyTest_{}(self):".format(x + 1))
+            code_out.append(self.INDENT_STRING) 
+            code_out = code_out + [ self.INDENT_STRING + self.INDENT_STRING + line for line in self.output_test_code_single_test(object_state_list[x], x, **kwarg) ]
 
         # Code at end of code
         code_out.append("suite = unittest.TestLoader().loadTestsFromTestCase({})".format(test_case_name))
@@ -177,7 +180,7 @@ class ObjectCodeOutput():
        
         # Pickle the object - set the options to intent lines
         p = jsonpickle.JSONPluginMgr() 
-        p.set_encoder_options('simplejson', sort_keys=True, indent=4)
+        p.set_encoder_options('simplejson', sort_keys=True, indent=self.INDENT_SIZE)
         j = jsonpickle.pickler.Pickler()
         encoded_obj = p.encode(j.flatten(var_in))
         
