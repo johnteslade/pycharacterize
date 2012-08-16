@@ -52,6 +52,7 @@ class ObjectsList():
         for bad in bad_tests:
             self.object_state_list.remove(bad)
 
+
     def remove_dups(self):
         """ Remove duplicates from object lists """
         
@@ -60,9 +61,29 @@ class ObjectsList():
 
             logging.debug("State = {}".format(object_state.call_trace))
 
-            if len(filter(lambda x: x.call_trace == object_state.call_trace, self.object_state_list)) > 1:
+            if len(filter(lambda x: self.equal_call_traces(x.call_trace, object_state.call_trace), self.object_state_list)) > 1:
                 print "Found a dupe"
+                raise Exception
 
+
+    def equal_call_traces(self, lhs, rhs):
+        """ Returns if the traces are the same """
+
+        dict_keys_to_compare = ['type', 'func', 'return', 'inputs', 'vals']
+
+        if len(lhs) != len(rhs):
+            return False
+
+        for x in xrange(len(lhs)):
+            for key in dict_keys_to_compare:
+                try:
+                    if lhs[x][key] != rhs[x][key]:
+                        return False
+                except KeyError:
+                    return False
+
+        return True
+    
 
     def _get_object_state(self, obj_id):
         """ Returns the object state of interest """
