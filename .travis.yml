@@ -5,6 +5,6 @@ python:
   - "2.7"
 # command to install dependencies
 install:
-  - pip install jsonpickle
+  - pip install jsonpickle json
 # command to run tests
 script:  python tests/unit_test.py
