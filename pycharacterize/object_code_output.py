@@ -41,9 +41,13 @@ class ObjectCodeOutput():
         code_out.append(self.INDENT_STRING) 
         
         for x in xrange(len(object_state_list)):
-            code_out.append(self.INDENT_STRING + "def test_MyTest_{}(self):".format(x + 1))
-            code_out.append(self.INDENT_STRING) 
-            code_out = code_out + [ self.INDENT_STRING + self.INDENT_STRING + line for line in self.output_test_code_single_test(object_state_list[x], x, **kwarg) ]
+            
+            single_test_code = self.output_test_code_single_test(object_state_list[x], x, **kwarg)
+
+            if single_test_code:
+                code_out.append(self.INDENT_STRING + "def test_MyTest_{}(self):".format(x + 1))
+                code_out.append(self.INDENT_STRING) 
+                code_out = code_out + [ self.INDENT_STRING + self.INDENT_STRING + line for line in single_test_code ]
 
         # Code at end of code
         code_out.append("suite = unittest.TestLoader().loadTestsFromTestCase({})".format(test_case_name))
@@ -69,6 +73,11 @@ class ObjectCodeOutput():
 
         # Create obj if we have no explict __init__call
         if len(filter(lambda x: x['type'] == 'func_call' and x['func'] == "__init__", object_state.call_trace)) == 0:
+            
+            # Skip tests we have had not had a call to the __init__ function
+            # TODO work out where this can actually happen that is useful 
+            return None
+
             code_out.append("# Object initialiser - no actual function")
             code_out.append("obj_var = {}()".format(object_state.class_name))
             code_out.append("")
