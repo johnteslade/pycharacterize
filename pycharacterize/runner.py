@@ -130,15 +130,15 @@ class TestPdb(bdb.Bdb):
         if type(class_name_str) != str:
             raise Exception("Class name must be a string")
 
-        # Save the class name
-        self.objects_list.set_class_to_watch(class_name_str)
-
         # Get list of class functions and set breakpoints
         class_functions = self.find_class_functions(class_name)
         self.filename_of_interest = class_functions[0]['filename']
         
         if not self.step_all:
             self.set_breakpoints(class_functions)
+
+        # Save the class details
+        self.objects_list.set_class_to_watch(class_name_str, [ func['name'] for func in class_functions ])
         
         print "Breaks = {}".format(self.get_all_breaks())
 

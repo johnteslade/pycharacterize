@@ -11,12 +11,14 @@ class ObjectsList():
         self.class_of_interest = None # String of class we are interested in
         self.class_of_interest_ref = None # Class references of class we are interested in
         self.object_state_list = [] # List of objects being monitored
+        self.func_names = [] # List of object functions
 
 
-    def set_class_to_watch(self, class_name):
+    def set_class_to_watch(self, class_name, func_names):
         """ Sets the class name to watch for - as a string """
         self.class_of_interest = str(class_name)
         self.class_of_interest_ref = class_name
+        self.func_names = func_names
         
 
     def is_of_interest(self, class_name, class_name_ref):
@@ -32,7 +34,7 @@ class ObjectsList():
 
         logging.debug("Run has finished")
 
-        #self.remove_bad_tests()
+        self.remove_bad_tests()
         self.remove_dups()
 
 
@@ -45,9 +47,11 @@ class ObjectsList():
         bad_tests = []
 
         for object_state in self.object_state_list:
-            if len(filter(lambda x: x['type'] == 'func_call' and x['func'] == "__init__", object_state.call_trace)) == 0:
-                print "Found bad test: {}".format(object_state.call_trace)
-                bad_tests.append(object_state)
+
+            if ('__init__' in self.func_names):
+                if len(filter(lambda x: x['type'] == 'func_call' and x['func'] == "__init__", object_state.call_trace)) == 0:
+                    print "Found bad test: {}".format(object_state.call_trace)
+                    bad_tests.append(object_state)
 
         for bad in bad_tests:
             self.object_state_list.remove(bad)
