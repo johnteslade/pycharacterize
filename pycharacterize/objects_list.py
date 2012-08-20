@@ -49,6 +49,8 @@ class ObjectsList():
             if ('__init__' in self.func_names) and len(filter(lambda x: x['type'] == 'func_call' and x['func'] == "__init__", object_state.call_trace)) == 0:
                 print "Found bad test: {}".format(object_state.call_trace)
                 bad_tests.append(object_state)
+        
+        logging.debug("Found {} bad tests".format(len(set(bad_tests))))
 
         for bad in bad_tests:
             self.object_state_list.remove(bad)
@@ -57,22 +59,21 @@ class ObjectsList():
     def remove_dups(self):
         """ Remove duplicates from object lists """
         
-        bad_tests = []
+        dupe_tests = []
         
         for x in xrange(len(self.object_state_list)):
 
             for y in xrange(x + 1, len(self.object_state_list)):
 
-                print "comparing {} and {}".format(x, y)
-                
                 s1 = self.object_state_list[x].call_trace
                 s2 = self.object_state_list[y].call_trace
                 
                 if self.equal_call_traces(s1, s2):
-                    print "Found a dupe"
-                    bad_tests.append(self.object_state_list[y])
+                    dupe_tests.append(self.object_state_list[y])
+        
+        logging.debug("Found {} duplicate tests".format(len(set(dupe_tests))))
                     
-        for bad in set(bad_tests):
+        for bad in set(dupe_tests):
             self.object_state_list.remove(bad)
 
 
