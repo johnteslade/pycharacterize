@@ -41,17 +41,14 @@ class ObjectsList():
     def remove_bad_tests(self):
         """ Removes any bad calls """
 
-        # Currently looks for tests that have no call to __init___
-        # TODO work out where this can actually happen that is useful 
-
         bad_tests = []
 
         for object_state in self.object_state_list:
 
-            if ('__init__' in self.func_names):
-                if len(filter(lambda x: x['type'] == 'func_call' and x['func'] == "__init__", object_state.call_trace)) == 0:
-                    print "Found bad test: {}".format(object_state.call_trace)
-                    bad_tests.append(object_state)
+            # Find states where there is an constructor but not calls to it
+            if ('__init__' in self.func_names) and len(filter(lambda x: x['type'] == 'func_call' and x['func'] == "__init__", object_state.call_trace)) == 0:
+                print "Found bad test: {}".format(object_state.call_trace)
+                bad_tests.append(object_state)
 
         for bad in bad_tests:
             self.object_state_list.remove(bad)
