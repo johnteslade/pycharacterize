@@ -71,12 +71,12 @@ class ObjectCodeOutput():
         code_out.append("from pycharacterize.object_factory import object_factory")
         code_out.append("")
 
-        # Create obj if we have no explict __init__call
+        # Create obj if we have no explict __init__ call
         if len(filter(lambda x: x['type'] == 'func_call' and x['func'] == "__init__", object_state.call_trace)) == 0:
             
             # Skip tests we have had not had a call to the __init__ function
             # TODO work out where this can actually happen that is useful 
-            return None
+            #return None
 
             code_out.append("# Object initialiser - no actual function")
             code_out.append("obj_var = {}()".format(object_state.class_name))

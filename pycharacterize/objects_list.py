@@ -32,7 +32,7 @@ class ObjectsList():
 
         logging.debug("Run has finished")
 
-        self.remove_bad_tests()
+        #self.remove_bad_tests()
         self.remove_dups()
 
 
