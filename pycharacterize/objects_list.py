@@ -57,14 +57,23 @@ class ObjectsList():
     def remove_dups(self):
         """ Remove duplicates from object lists """
         
+        bad_tests = []
+        
+        for x in xrange(len(self.object_state_list)):
 
-        for object_state in self.object_state_list:
+            for y in xrange(x + 1, len(self.object_state_list)):
 
-            logging.debug("State = {}".format(object_state.call_trace))
-
-            if len(filter(lambda x: self.equal_call_traces(x.call_trace, object_state.call_trace), self.object_state_list)) > 1:
-                print "Found a dupe"
-                raise Exception
+                print "comparing {} and {}".format(x, y)
+                
+                s1 = self.object_state_list[x].call_trace
+                s2 = self.object_state_list[y].call_trace
+                
+                if self.equal_call_traces(s1, s2):
+                    print "Found a dupe"
+                    bad_tests.append(self.object_state_list[y])
+                    
+        for bad in set(bad_tests):
+            self.object_state_list.remove(bad)
 
 
     def equal_call_traces(self, lhs, rhs):
@@ -72,17 +81,19 @@ class ObjectsList():
 
         dict_keys_to_compare = ['type', 'func', 'return', 'inputs', 'vals']
 
+        # Basic check on lengths of stacks
         if len(lhs) != len(rhs):
             return False
 
+        # Look through stacks, filter to values interested in and then compare 
         for x in xrange(len(lhs)):
-            for key in dict_keys_to_compare:
-                try:
-                    if lhs[x][key] != rhs[x][key]:
-                        return False
-                except KeyError:
-                    return False
-
+        
+            lhs_filtered = filter(lambda (k, v): k in dict_keys_to_compare, lhs[x].items())
+            rhs_filtered = filter(lambda (k, v): k in dict_keys_to_compare, rhs[x].items())
+            
+            if lhs_filtered != rhs_filtered:
+                return False
+                
         return True
     
 
