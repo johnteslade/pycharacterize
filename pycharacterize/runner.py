@@ -42,6 +42,8 @@ class TestPdb(bdb.Bdb):
         self.objects_list = ObjectsList() # List of objects
 
         self.filename_of_interest = None # The filename we are looking for
+        
+        self.calltrace_only = False # Are we only doing a call trace?
 
         # Reset all vars
         self.reset()
@@ -80,6 +82,27 @@ class TestPdb(bdb.Bdb):
 
             # Finish objects
             self.objects_list.run_finished()
+
+
+    def do_calltrace(self, *args, **kwds):
+        """ Run through code to fine call traces """
+
+
+        self.calltrace_only = True
+        self.step_all = True
+
+        # Run but catch if the program exits - we still need to keep executing
+        try:
+            self.runcall(*args, **kwds)
+        except SystemExit:
+            logging.debug("Caller raised SystemExit")
+        finally:
+            # Clear breaks
+            # This appears to be a bug in bdb - if they are not cleared they are still active in 
+            # the next instance of BDB
+            self.clear_all_breaks()
+
+            
 
     # Override Bdb methods
 
@@ -205,7 +228,7 @@ class TestPdb(bdb.Bdb):
                 self.class_counts[class_name] += 1
 
             # Class we are interested in? 
-            if self.objects_list.is_of_interest(class_name, local_vars['self'].__class__):
+            if not self.calltrace_only and self.objects_list.is_of_interest(class_name, local_vars['self'].__class__):
             
                 logging.debug("Of interest --- Class = {}, Func = {}, call = {}, return = {}".format(class_name, self.stack[self.curindex][0].f_code.co_name, func_call, func_return))
             
