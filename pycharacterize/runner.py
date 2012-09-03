@@ -87,7 +87,6 @@ class TestPdb(bdb.Bdb):
     def do_calltrace(self, *args, **kwds):
         """ Run through code to fine call traces """
 
-
         self.calltrace_only = True
         self.step_all = True
 
@@ -101,6 +100,7 @@ class TestPdb(bdb.Bdb):
             # This appears to be a bug in bdb - if they are not cleared they are still active in 
             # the next instance of BDB
             self.clear_all_breaks()
+
 
     def output_calltrace(self):
         """ Prints out the call trace - as created by do_calltrace """
