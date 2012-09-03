@@ -21,8 +21,7 @@ class ObjectState():
         # Save the current call stack just within the object
         self.call_stack.append(func_name)
 
-        logging.debug("call_stack = {}".format(self.call_stack))
-
+        logging.debug("function_call: stack = {}".format(self.call_stack))
 
         # Only check for differences if we one level into object
         if len(self.call_stack) == 1:
@@ -45,6 +44,8 @@ class ObjectState():
 
         # Take this func now off the stack
         return_func = self.call_stack.pop()
+        
+        logging.debug("function_return: stack = {}".format(self.call_stack))
        
         if (return_func != func_name):
             logging.warn("Error with call stack return_func = {}, func_name = {}, call_stack = {}".format(return_func, func_name, self.call_stack))
