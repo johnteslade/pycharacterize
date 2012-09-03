@@ -186,17 +186,25 @@ class ObjectCodeOutput():
 
     def create_object_factory_call(self, var_in):
         """ Returns the string needed for an object_factory call """
-       
-        # Pickle the object - set the options to intent lines
-        p = jsonpickle.JSONPluginMgr() 
-        p.set_encoder_options('simplejson', sort_keys=True, indent=self.INDENT_SIZE)
-        j = jsonpickle.pickler.Pickler()
-        encoded_obj = p.encode(j.flatten(var_in))
-        
-        encoded_obj = encoded_obj.replace("'", "\\'")
-        encoded_obj = encoded_obj.replace('\\"', '\\\\"')
-        
-        return "object_factory(\"\"\"{}\"\"\")".format(encoded_obj)
+
+        # Detect slots objects
+        if hasattr(var_in, "__slots__"): 
+
+            # TODO try and use repr here
+            logging.warning("Cannot pickle as object uses __slots__")
+            return "None"
+
+        else:
+            # Pickle the object - set the options to intent lines
+            p = jsonpickle.JSONPluginMgr() 
+            p.set_encoder_options('simplejson', sort_keys=True, indent=self.INDENT_SIZE)
+            j = jsonpickle.pickler.Pickler()
+            encoded_obj = p.encode(j.flatten(var_in))
+            
+            encoded_obj = encoded_obj.replace("'", "\\'")
+            encoded_obj = encoded_obj.replace('\\"', '\\\\"')
+            
+            return "object_factory(\"\"\"{}\"\"\")".format(encoded_obj)
 
 
 
