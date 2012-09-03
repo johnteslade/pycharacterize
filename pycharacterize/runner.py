@@ -102,7 +102,21 @@ class TestPdb(bdb.Bdb):
             # the next instance of BDB
             self.clear_all_breaks()
 
-            
+    def output_calltrace(self):
+        """ Prints out the call trace - as created by do_calltrace """
+
+        calls_made = self.all_calls.items()
+        
+        for (class_called, funcs) in calls_made:
+
+            print "Class {}".format(class_called)
+
+            for (func, calls) in funcs.items():
+
+                print "  {}() - {} calls".format(func, calls)   
+           
+            print
+        
 
     # Override Bdb methods
 

@@ -30,6 +30,9 @@ if __name__ == "__main__":
 
     pdb_obj.do_calltrace(dateutil_test)
     
+
+    pdb_obj.output_calltrace()
+    
     print pdb_obj.all_calls.items()
     print pdb_obj.class_counts.items()
 
