@@ -97,6 +97,8 @@ class ObjectCodeOutput():
             # Function                         
             else:
 
+                # TODO check for the exception paramameter and then use unittest catch exception
+
                 # Init
                 if call['func'] == "__init__":
                     code_out.append("# Object initialiser")

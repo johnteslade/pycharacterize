@@ -59,19 +59,26 @@ class ObjectState():
             inputs = local_vars.copy()
             del inputs['self']
             del inputs['__return__']
-            
+            if '__exception__' in inputs:
+                del inputs['__exception__'] 
+               
             back_trace = []
 
             for (frame, lineno) in stack:
                 back_trace.append("{}() at {}:{}".format(frame.f_code.co_name, frame.f_code.co_filename, lineno))
 
-            self.call_trace.append({
+            call_details = {
                 'type': 'func_call',
                 'func': func_name, 
                 'return': local_vars['__return__'],
                 'inputs': inputs,
                 'stack': back_trace,
-            })
+            }
+
+            if '__exception__' in local_vars:
+                call_details['exception'] = local_vars['__exception__'][0]
+            
+            self.call_trace.append(call_details)
 
         # Save current state of object attributes
         self.last_val_obj = self.create_obj_attr_dict(local_vars['self'])
