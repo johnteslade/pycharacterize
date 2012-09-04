@@ -160,9 +160,9 @@ class ObjectCodeOutput():
             return "'{}'".format(var_in)
         # Is this a type
         elif type(var_in) == type:
-            class_match = re.match("^<class '(.*)'>$", str(var_in))
-            if class_match: 
-                return class_match.group(1)
+            type_details = self.get_type_class(var_in)
+            if type_details: 
+                return type_details
             else:
                 print "Unknown type - {}".format(type(var_in))
                 return "UNKNOWN_TYPE({} {})".format(var_in, type(var_in))
@@ -207,6 +207,19 @@ class ObjectCodeOutput():
             encoded_obj = encoded_obj.replace('\\"', '\\\\"')
             
             return "object_factory(\"\"\"{}\"\"\")".format(encoded_obj)
+
+
+        
+    def get_type_class(self, var_in):
+        """ Returns a string of the type info """
+
+        # TODO there must be a better way of doing this - given that the interactive python shell can print it directly
+
+        class_match = re.match("^<class '(.*)'>$", str(var_in))
+        if class_match: 
+            return class_match.group(1)
+        else:
+            return None
 
 
 
