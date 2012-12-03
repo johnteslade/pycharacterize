@@ -87,6 +87,13 @@ class MyTest4(MyTest):
     def get_for_a(self):
         return AnObject()
 
+class MyTest5(MyTest):
+    """ Class that raises exceptions """
+
+    def get_for_a(self):
+        raise Exception
+
+
 
 class AnObject():
     """ Generic class that can be passed around """
