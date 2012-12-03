@@ -1,4 +1,4 @@
 
 import runner
-from runner import TestPdb
+from runner import Runner
 

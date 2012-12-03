@@ -20,7 +20,7 @@ class Test_test_Pdb(unittest.TestCase):
     def manipulate_given_class(self, class_to_test, class_to_test_str, manipulate_func=mytest.manipulate_class, step_all=False):
         """ Tests the given class using manipulate_class() """
 
-        pdb_obj = pycharacterize.TestPdb(step_all=step_all)
+        pdb_obj = pycharacterize.Runner(step_all=step_all)
         pdb_obj.set_class_to_watch(class_to_test, class_to_test_str)
         pdb_obj.do_runcall(manipulate_func, class_to_test)
 

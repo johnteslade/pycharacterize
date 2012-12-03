@@ -26,7 +26,7 @@ _repr.maxstring = 200
 _saferepr = _repr.repr
 
 
-class TestPdb(bdb.Bdb):
+class Runner(bdb.Bdb):
 
     def __init__(self, completekey='tab', skip=None, step_all=False):
         bdb.Bdb.__init__(self, skip=skip)

@@ -43,7 +43,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     #logging.basicConfig(level=logging.INFO)
 
-    pdb_obj = pycharacterize.runner.TestPdb(step_all=False)
+    pdb_obj = pycharacterize.runner.Runner(step_all=False)
 
     pdb_obj.set_class_to_watch(class_ut.MyTest, "class_ut.MyTest")
     pdb_obj.do_runcall(do_stuff)

@@ -46,7 +46,7 @@ if __name__ == "__main__":
     sys.path.insert(0, '/usr/share/yum-cli')
     import yummain
 
-    pdb_obj = pycharacterize.runner.TestPdb()
+    pdb_obj = pycharacterize.runner.Runner()
 
     pdb_obj.do_calltrace(dateutil_test)
     
@@ -59,7 +59,7 @@ if __name__ == "__main__":
 
     # Create tests
 
-    pdb_obj = pycharacterize.runner.TestPdb(step_all=True)
+    pdb_obj = pycharacterize.runner.Runner(step_all=True)
    
     pdb_obj.set_class_to_watch(dateutil.parser.parserinfo, "dateutil.parser.parserinfo")
 

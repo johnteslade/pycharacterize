@@ -16,7 +16,7 @@ if __name__ == "__main__":
     sys.path.insert(0, '/usr/share/yum-cli')
     import yummain
 
-    pdb_obj = pycharacterize.runner.TestPdb()
+    pdb_obj = pycharacterize.runner.Runner()
    
     pdb_obj.set_class_to_watch(yum.config.BoolOption, "yum.config.BoolOption")
     #pdb_obj.set_class_to_watch(yum.config.IntOption, "yum.config.IntOption")

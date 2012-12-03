@@ -31,7 +31,7 @@ if __name__ == "__main__":
     #logging.basicConfig(level=logging.INFO)
     logging.basicConfig(level=logging.DEBUG)
 
-    pdb_obj = test_pdb.TestPdb()
+    pdb_obj = test_pdb.Runner()
    
     pdb_obj.set_class_to_watch(jsonpickle.pickler.Pickler, "jsonpickle.pickler.Pickler")
 
