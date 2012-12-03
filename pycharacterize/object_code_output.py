@@ -192,9 +192,16 @@ class ObjectCodeOutput():
         # Detect slots objects
         if hasattr(var_in, "__slots__"): 
 
-            # TODO try and use repr here
-            logging.warning("Cannot pickle as object uses __slots__")
-            return "None"
+            # Try and use repr to recreate  
+            repr_result = self.repr_encode(var_in)
+
+            if repr_result:
+                return repr_result
+            else:
+                # TODO should this be fatal?
+                logging.warning("Cannot pickle as object uses __slots__")
+                logging.warning("repr result = {}".format(self.repr_encode(var_in)))
+                return "None"
 
         else:
             # Pickle the object - set the options to intent lines
@@ -209,6 +216,37 @@ class ObjectCodeOutput():
             return "object_factory(\"\"\"{}\"\"\")".format(encoded_obj)
 
 
+    def repr_encode(self, var_in):
+        """ Attempts to use repr to reconstruct object """
+
+        repr_result = repr(var_in)
+
+        class_type = self.get_type_class(var_in.__class__)
+        module_name = ".".join(class_type.split(".")[:-1])
+
+        logging.debug("repr = {} type = {} module = {}".format(repr_result, class_type, module_name))
+
+        repr_result = module_name + "." + repr_result
+
+        code_ok = True
+
+        try:
+            __import__(module_name)
+        except Exception as e:
+            code_ok = False
+            logging.warning("import of {} failed = {}".format(module_name, e))
+
+        try:
+            test_obj = eval(repr_result)
+        except Exception as e:
+            code_ok = False
+            logging.warning("eval of |{}| failed = {}".format(repr_result, e))
+
+        if code_ok:
+            return repr_result
+        else:
+            return None
+        
         
     def get_type_class(self, var_in):
         """ Returns a string of the type info """
