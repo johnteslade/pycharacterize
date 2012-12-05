@@ -25,3 +25,5 @@ class MyTest(object):
 
     def equal(self):
         return self.b == self.c
+
+

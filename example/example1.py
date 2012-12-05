@@ -17,25 +17,34 @@ def do_stuff():
 
     test_obj = class_ut.MyTest()
 
+    step_1(test_obj)
+    step_2(test_obj)
+
+
+def step_1(test_obj):
+    
     item_for_a = test_obj.get_for_a()
-    print "manipulate_class: {}".format(item_for_a)
 
     test_obj.add_a(item_for_a)
     out = test_obj.get_a()
-    print "manipulate_class: {}".format(out)
 
-    out = test_obj.equal()
-    print "manipulate_class: {}".format(out)
-   
-    test_obj.c = 4
+
+def step_2(test_obj):
+
+    step_2a(test_obj)
 
     test_obj.inc_by_1()
     out = test_obj.equal()
-    print "manipulate_class: {}".format(out)
 
     test_obj.inc(2)
     out = test_obj.equal()
-    print "manipulate_class: {}".format(out)
+
+
+def step_2a(test_obj):
+
+    out = test_obj.equal()
+   
+    test_obj.c = 4
 
 
 if __name__ == "__main__":
