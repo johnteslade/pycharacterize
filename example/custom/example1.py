@@ -6,6 +6,7 @@ import logging
 import class_ut
 
 # Modify paths so import pycharacterize works
+sys.path.append("../../")
 sys.path.append("../")
 sys.path.append(".")
 
