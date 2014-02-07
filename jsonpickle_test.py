@@ -31,11 +31,11 @@ if __name__ == "__main__":
     #logging.basicConfig(level=logging.INFO)
     logging.basicConfig(level=logging.DEBUG)
 
-    pdb_obj = test_pdb.Runner()
+    pych_obj = test_pdb.Runner()
    
-    pdb_obj.set_class_to_watch(jsonpickle.pickler.Pickler, "jsonpickle.pickler.Pickler")
+    pych_obj.set_class_to_watch(jsonpickle.pickler.Pickler, "jsonpickle.pickler.Pickler")
 
-    pdb_obj.do_runcall(jsonpickle_main)
+    pych_obj.do_runcall(jsonpickle_main)
 
 
 
@@ -44,13 +44,13 @@ if __name__ == "__main__":
     print "!!!!!!!!!!!!!!!!!!!----------------"
     print
 
-    test_code = pdb_obj.output_test_code()
+    test_code = pych_obj.output_test_code()
     print test_code
 
     print
     print "---------------- All Calls"
-    print pdb_obj.all_calls.items()
-    print pdb_obj.class_counts.items()
+    print pych_obj.all_calls.items()
+    print pych_obj.class_counts.items()
     print 
 
 

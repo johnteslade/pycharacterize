@@ -26,14 +26,14 @@ The way to invoke the entire program is by calling yummain.user_main() - this wi
 The way to use pycharacterize to generate the tests is as follows:
 
     # Setup to create tests for the yum.config.BoolOption class
-    pdb_obj = pycharacterize.runner.Runner()
-    pdb_obj.set_class_to_watch(yum.config.BoolOption, "yum.config.BoolOption")
+    pych_obj = pycharacterize.runner.Runner()
+    pych_obj.set_class_to_watch(yum.config.BoolOption, "yum.config.BoolOption")
 
     # Execute yum
-    pdb_obj.do_runcall(yummain.user_main, [], exit_code=True)
+    pych_obj.do_runcall(yummain.user_main, [], exit_code=True)
 
     # Output the generated tests
-    pdb_obj.output_test_code_to_file("testcases_yum.py")
+    pych_obj.output_test_code_to_file("testcases_yum.py")
 
 This will run the program and generate us pyunit tests:
 

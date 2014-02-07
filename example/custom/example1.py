@@ -53,15 +53,15 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     #logging.basicConfig(level=logging.INFO)
 
-    pdb_obj = pycharacterize.runner.Runner(step_all=False)
+    pych_obj = pycharacterize.runner.Runner(step_all=False)
 
-    pdb_obj.set_class_to_watch(class_ut.MyTest, "class_ut.MyTest")
-    pdb_obj.do_runcall(do_stuff)
+    pych_obj.set_class_to_watch(class_ut.MyTest, "class_ut.MyTest")
+    pych_obj.do_runcall(do_stuff)
 
     print
     print "---------------- All Calls"
-    print pdb_obj.all_calls.items()
-    print pdb_obj.class_counts.items()
+    print pych_obj.all_calls.items()
+    print pych_obj.class_counts.items()
     print 
 
 
@@ -69,10 +69,10 @@ if __name__ == "__main__":
     print "!!!!!!!!!!!!!!!!!!!----------------"
     print
 
-    test_code = pdb_obj.output_test_code(backtrace=True)
+    test_code = pych_obj.output_test_code(backtrace=True)
     print test_code
 
-    pdb_obj.output_test_code_to_file("./example_test_output.py")
+    pych_obj.output_test_code_to_file("./example_test_output.py")
 
     print
     print "!!!!!!!!!!!!!!!!!!! RUNNING THE AUTOGEN ----------------"
