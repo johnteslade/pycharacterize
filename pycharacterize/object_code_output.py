@@ -2,7 +2,10 @@ import logging
 import re
 import jsonpickle
 
+from jinja2 import Environment, PackageLoader
+
 class ObjectCodeOutput():
+
     """ Class to handle the outputting of code for the object """
 
     INDENT_SIZE = 4 # Number of spaces to indent
@@ -11,7 +14,7 @@ class ObjectCodeOutput():
     def output_test_code(self, object_state_list, **kwarg):
         """ Returns the code for the test harness """
         
-        return "\n".join(self.output_test_code_list(object_state_list, **kwarg))
+        return self.output_test_code_list(object_state_list, **kwarg)
 
 
     def output_test_code_annotated(self, object_state):
@@ -30,15 +33,13 @@ class ObjectCodeOutput():
         logging.info("State list len = {}".format(len(object_state_list)))
 
         code_out = []
-        
-        test_case_name = "Test_{}".format(object_state_list[0].class_name.replace(".", "_"))
+       
+        # Get jinja environment
+        env = Environment(loader=PackageLoader('pycharacterize', 'templates'))
 
-        # Define the initial code
-        code_out.append("import unittest")
-        code_out.append("import {}".format(object_state_list[0].class_name.split(".")[0]))
-        code_out.append("") 
-        code_out.append("class {}(unittest.TestCase):".format(test_case_name))
-        code_out.append(self.INDENT_STRING) 
+        template = env.get_template('testcase.tpl.py') 
+
+        test_case_name = "Test_{}".format(object_state_list[0].class_name.replace(".", "_"))
         
         for x in xrange(len(object_state_list)):
             
@@ -49,11 +50,11 @@ class ObjectCodeOutput():
                 code_out.append(self.INDENT_STRING) 
                 code_out = code_out + [ self.INDENT_STRING + self.INDENT_STRING + line for line in single_test_code ]
 
-        # Code at end of code
-        code_out.append("suite = unittest.TestLoader().loadTestsFromTestCase({})".format(test_case_name))
-        code_out.append("unittest.TextTestRunner(verbosity=2).run(suite)")
-
-        return code_out
+        return template.render({
+            'module': object_state_list[0].class_name.split(".")[0], 
+            'test_case_name': test_case_name,
+            'test_cases': "\n".join(code_out),
+        })
 
 
     def output_test_code_single_test(self, object_state, test_num, **kwarg):
