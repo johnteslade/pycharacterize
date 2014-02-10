@@ -32,28 +32,25 @@ class ObjectCodeOutput():
         logging.info("State list = {}".format(object_state_list))
         logging.info("State list len = {}".format(len(object_state_list)))
 
-        code_out = []
-       
-        # Get jinja environment
+        # Get jinja environment and templates
         env = Environment(loader=PackageLoader('pycharacterize', 'templates'))
-
         template = env.get_template('testcase.tpl.py') 
 
         test_case_name = "Test_{}".format(object_state_list[0].class_name.replace(".", "_"))
-        
+       
+        test_cases = []
+
         for x in xrange(len(object_state_list)):
             
             single_test_code = self.output_test_code_single_test(object_state_list[x], x, **kwarg)
 
             if single_test_code:
-                code_out.append(self.INDENT_STRING + "def test_MyTest_{}(self):".format(x + 1))
-                code_out.append(self.INDENT_STRING) 
-                code_out = code_out + [ self.INDENT_STRING + self.INDENT_STRING + line for line in single_test_code ]
+                test_cases.append(single_test_code)
 
         return template.render({
             'module': object_state_list[0].class_name.split(".")[0], 
             'test_case_name': test_case_name,
-            'test_cases': "\n".join(code_out),
+            'test_cases': test_cases,
         })
 
 
