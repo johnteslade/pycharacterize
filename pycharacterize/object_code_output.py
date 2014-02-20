@@ -9,7 +9,6 @@ class ObjectCodeOutput():
     """ Class to handle the outputting of code for the object """
 
     INDENT_SIZE = 4 # Number of spaces to indent
-    INDENT_STRING = (" " * INDENT_SIZE) # A string for one indent
 
     def output_test_code(self, object_state_list, **kwarg):
         """ Returns the code for the test harness """
@@ -33,7 +32,9 @@ class ObjectCodeOutput():
         logging.info("State list len = {}".format(len(object_state_list)))
 
         # Get jinja environment and templates
-        env = Environment(loader=PackageLoader('pycharacterize', 'templates'))
+        env = Environment(loader=PackageLoader('pycharacterize', 'templates'), trim_blocks=True, lstrip_blocks=True)
+        env.filters['format_input_text'] = self.format_input_text 
+         
         template = env.get_template('testcase.tpl.py') 
 
         test_case_name = "Test_{}".format(object_state_list[0].class_name.replace(".", "_"))
@@ -42,15 +43,14 @@ class ObjectCodeOutput():
 
         for x in xrange(len(object_state_list)):
             
-            single_test_code = self.output_test_code_single_test(object_state_list[x], x, **kwarg)
-
-            if single_test_code:
-                test_cases.append(single_test_code)
+            test_cases.append(self.output_test_code_single_test(object_state_list[x], x, **kwarg))
 
         return template.render({
             'module': object_state_list[0].class_name.split(".")[0], 
-            'test_case_name': test_case_name,
+            'class_name': object_state_list[0].class_name,
+            'class_name_var': object_state_list[0].class_name.replace(".", "_"),
             'test_cases': test_cases,
+            'backtrace': ('backtrace' in kwarg and kwarg['backtrace'] == True),
         })
 
 
@@ -61,84 +61,22 @@ class ObjectCodeOutput():
 
         logging.debug("Call stack = {}".format(object_state.call_trace))
 
-
-        code_out = []
-        
-        code_out.append("""print "Starting execution of autogen test harness for {}" """.format(object_state.class_name))
-        code_out.append("")
-        code_out.append("from pycharacterize.object_factory import object_factory")
-        code_out.append("")
-
-        # Create obj if we have no explict __init__ call
-        if len(filter(lambda x: x['type'] == 'func_call' and x['func'] == "__init__", object_state.call_trace)) == 0:
-            
-            # Skip tests we have had not had a call to the __init__ function
-            # TODO work out where this can actually happen that is useful 
-            #return None
-
-            code_out.append("# Object initialiser - no actual function")
-            code_out.append("obj_var = {}()".format(object_state.class_name))
-            code_out.append("")
-
-        # We must have a call trace to do this
         assert len(object_state.call_trace) > 0
 
-        # Handle all trace items
-        for call in object_state.call_trace:
+        return {
+            'no_init': (len(filter(lambda x: x['type'] == 'func_call' and x['func'] == "__init__", object_state.call_trace)) == 0),
+            'call_trace': object_state.call_trace,
+             
+        }
 
-            # Change in attribute types
-            if call['type'] == "attr_change":
-                    code_out.append("# Attributes changed directly")
-                    for k, v in call['vals'].items():                    
-                        code_out.append("obj_var.{} = {}".format(k,v))
-
-            # Function                         
-            else:
-
-                # TODO check for the exception paramameter and then use unittest catch exception
-
-                # Init
-                if call['func'] == "__init__":
-                    code_out.append("# Object initialiser")
-                    code_out.append("obj_var = {}({})".format(object_state.class_name, self.format_input_text(call['inputs'])))
-
-                # Function call
-                else:
-                    code_out.append("# Call to {}".format(call['func']))
-              
-                    if 'backtrace' in kwarg and kwarg['backtrace'] == True:
-                        for stack in call['stack'][1:-1]: 
-                            code_out.append("# Backtrace: {}".format(stack))
-              
-
-                    func_inputs = self.format_input_text(call['inputs']) 
-
-                    if call['return'] != None:
-                        code_out.append("ret = obj_var.{}({})".format(call['func'], func_inputs))
-                        code_out.append("expected_return = {}".format(self.print_var(call['return'])))
-                        
-                        # Determine best method for comparison
-                        # TODO more complex types will need different comparison types
-                        if hasattr(call['return'], "__dict__"):                        
-                            code_out.append("self.assertEqual(ret.__dict__, expected_return.__dict__)")
-                        else:
-                            code_out.append("self.assertEqual(ret, expected_return)")
-
-                    else:
-                        code_out.append("obj_var.{}({})".format(call['func'], func_inputs))
-                
-            code_out.append("")
-       
-        code_out.append("""print "Done with execution of autogen test harness for {}" """.format(object_state.class_name))
-        code_out.append("") 
-
-        return code_out
-
-
+    
     def format_input_text(self, inputs):
         """ Formats function parameter types """
 
-        return ", ".join([ "{}={}".format(k, self.print_var(v)) for (k, v) in inputs.items() ])
+        if type(inputs) == dict:
+            return ", ".join([ "{}={}".format(k, self.print_var(v)) for (k, v) in inputs.items() ])
+        else:
+            return self.print_var(inputs)
 
 
     def print_var(self, var_in, depth=1):

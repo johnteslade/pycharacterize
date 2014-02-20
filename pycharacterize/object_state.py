@@ -71,6 +71,7 @@ class ObjectState():
                 'type': 'func_call',
                 'func': func_name, 
                 'return': local_vars['__return__'],
+                'return_dict': hasattr(local_vars['__return__'], "__dict__"),
                 'inputs': inputs,
                 'stack': back_trace,
             }
