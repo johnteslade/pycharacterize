@@ -3,6 +3,6 @@ python:
   - "2.7"
 # command to install dependencies
 install:
-  - pip install simplejson jsonpickle 
+  - pip install simplejson jsonpickle jinja2 
 # command to run tests
 script:  python tests/unit_test.py
