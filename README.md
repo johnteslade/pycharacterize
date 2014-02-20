@@ -10,7 +10,7 @@ Why did I create this
 
 In my software development experience I have come across many situations where parts of the source code need refactoring or improving but are missing even basic test harnesses.  Refactoring without test harnesses is dangerous as it's very easy to introduce bugs and then have to spend a long time debugging.  I'm of the opinion that refactoring needs a very quick - make some small changes, run tests to ensure nothing is broken, repeat....
 
-I chose to do this for Python because of it's ability to easily access the internal state of objects and I also wanted to learn more about Python and it's internals.
+I chose to do this for Python because of its ability to easily access the internal state of objects and I also wanted to learn more about Python and its internals.
 
 Example
 -------
