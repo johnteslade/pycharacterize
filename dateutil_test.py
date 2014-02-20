@@ -46,41 +46,41 @@ if __name__ == "__main__":
     sys.path.insert(0, '/usr/share/yum-cli')
     import yummain
 
-    pdb_obj = pycharacterize.runner.Runner()
+    pych_obj = pycharacterize.runner.Runner()
 
-    pdb_obj.do_calltrace(dateutil_test)
+    pych_obj.do_calltrace(dateutil_test)
     
 
-    pdb_obj.output_calltrace()
+    pych_obj.output_calltrace()
     
-    print pdb_obj.all_calls.items()
-    print pdb_obj.class_counts.items()
+    print pych_obj.all_calls.items()
+    print pych_obj.class_counts.items()
 
 
     # Create tests
 
-    pdb_obj = pycharacterize.runner.Runner(step_all=True)
+    pych_obj = pycharacterize.runner.Runner(step_all=True)
    
-    pdb_obj.set_class_to_watch(dateutil.parser.parserinfo, "dateutil.parser.parserinfo")
+    pych_obj.set_class_to_watch(dateutil.parser.parserinfo, "dateutil.parser.parserinfo")
 
-    pdb_obj.do_runcall(dateutil_test)
+    pych_obj.do_runcall(dateutil_test)
 
 
     print
     print "!!!!!!!!!!!!!!!!!!!----------------"
     print
 
-    test_code = pdb_obj.output_test_code(backtrace=True)
+    test_code = pych_obj.output_test_code(backtrace=True)
     print test_code
 
     print
     print "---------------- All Calls"
-    print pdb_obj.all_calls.items()
-    print pdb_obj.class_counts.items()
+    print pych_obj.all_calls.items()
+    print pych_obj.class_counts.items()
     print 
 
 
-    pdb_obj.output_test_code_to_file("testcases_dateutil.py", backtrace=True)
+    pych_obj.output_test_code_to_file("testcases_dateutil.py", backtrace=True)
 
     print
     print "!!!!!!!!!!!!!!!!!!! RUNNING THE AUTOGEN ----------------"

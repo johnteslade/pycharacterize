@@ -20,15 +20,15 @@ class Test_test_Pdb(unittest.TestCase):
     def manipulate_given_class(self, class_to_test, class_to_test_str, manipulate_func=mytest.manipulate_class, step_all=False):
         """ Tests the given class using manipulate_class() """
 
-        pdb_obj = pycharacterize.Runner(step_all=step_all)
-        pdb_obj.set_class_to_watch(class_to_test, class_to_test_str)
-        pdb_obj.do_runcall(manipulate_func, class_to_test)
+        pych_obj = pycharacterize.Runner(step_all=step_all)
+        pych_obj.set_class_to_watch(class_to_test, class_to_test_str)
+        pych_obj.do_runcall(manipulate_func, class_to_test)
 
         # There must be a call trace
-        self.assertTrue(len(pdb_obj.objects_list.get_call_trace()) > 0)
+        self.assertTrue(len(pych_obj.objects_list.get_call_trace()) > 0)
 
         # Check we have some test code output
-        test_code = pdb_obj.output_test_code()
+        test_code = pych_obj.output_test_code()
         logging.debug(test_code)
         self.assertTrue(test_code > 0)
 
