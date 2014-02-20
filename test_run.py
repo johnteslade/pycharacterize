@@ -30,7 +30,7 @@ if __name__ == "__main__":
     test_code = pych_obj.output_test_code(backtrace=True)
     print test_code
 
-    pych_obj.output_test_code_to_file("test_MyTest4.py", backtrace=True)
+    pych_obj.output_test_code_to_file("test_MyTest4.py", backtrace=False)
 
     print
     print "!!!!!!!!!!!!!!!!!!! RUNNING THE AUTOGEN ----------------"
