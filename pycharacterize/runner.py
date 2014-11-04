@@ -227,6 +227,12 @@ class Runner(bdb.Bdb):
         #print "k = {}".format(keywords)
         #print "l = {}".format(local_vars)
 
+        arg_names = args
+        if varargs:
+            arg_names += varargs
+        if keywords:
+            arg_names += keywords
+
         # Look for the class
         if 'self' in local_vars:
 
@@ -251,7 +257,7 @@ class Runner(bdb.Bdb):
 
                 # Save the details of the function call
                 if func_return:
-                    self.objects_list.function_return(local_vars, self.stack[self.curindex][0].f_code.co_name, self.stack)
+                    self.objects_list.function_return(arg_names, local_vars, self.stack[self.curindex][0].f_code.co_name, self.stack)
 
 
         #logging.debug("")

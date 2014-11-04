@@ -39,13 +39,13 @@ class ObjectState(object):
         # Save current state of object attributes
         self.last_val_obj = self.create_obj_attr_dict(local_vars['self'])
 
-    def function_return(self, local_vars, func_name, stack):
+    def function_return(self, arg_names, local_vars, func_name, stack):
         """ A return from a function """
 
         # Take this func now off the stack
         return_func = self.call_stack.pop()
 
-        logging.debug("function_return: stack = {}".format(self.call_stack))
+        logging.debug("function_return: func_name = {}, stack = {}".format(func_name, self.call_stack))
 
         if (return_func != func_name):
             logging.warn("Error with call stack return_func = {}, func_name = {}, call_stack = {}".format(return_func, func_name, self.call_stack))
@@ -56,11 +56,11 @@ class ObjectState(object):
         if len(self.call_stack) == 0 and func_name not in ['__get__', '__set__']:
 
             # Get the actual params passed in
-            inputs = local_vars.copy()
-            del inputs['self']
-            del inputs['__return__']
-            if '__exception__' in inputs:
-                del inputs['__exception__']
+            inputs = {}
+
+            for (k, v) in local_vars.items():
+                if k in arg_names and k != "self":
+                    inputs[k] = v
 
             back_trace = []
 
@@ -74,6 +74,8 @@ class ObjectState(object):
                 'inputs': inputs,
                 'stack': back_trace,
             }
+
+            logging.debug("Func return {}".format(call_details))
 
             if '__exception__' in local_vars:
                 call_details['exception'] = local_vars['__exception__'][0]

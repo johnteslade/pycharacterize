@@ -119,12 +119,12 @@ class ObjectsList(object):
         self._get_object_state(id(local_vars['self'])).function_call(local_vars, func_name)
 
 
-    def function_return(self, local_vars, func_name, stack):
+    def function_return(self, arg_names, local_vars, func_name, stack):
         """ A return from a function """
 
         logging.debug("Return from {}".format(id(local_vars['self'])))
 
-        self._get_object_state(id(local_vars['self'])).function_return(local_vars, func_name, stack)
+        self._get_object_state(id(local_vars['self'])).function_return(arg_names, local_vars, func_name, stack)
 
 
     def output_test_code(self, **kwarg):
