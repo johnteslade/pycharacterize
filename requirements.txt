@@ -1,0 +1,2 @@
+jsonpickle==0.8.0
+simplejson==2.3.2

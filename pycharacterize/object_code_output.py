@@ -205,10 +205,9 @@ class ObjectCodeOutput():
 
         else:
             # Pickle the object - set the options to intent lines
-            p = jsonpickle.JSONPluginMgr() 
-            p.set_encoder_options('simplejson', sort_keys=True, indent=self.INDENT_SIZE)
+            jsonpickle.set_encoder_options('simplejson', sort_keys=True, indent=self.INDENT_SIZE)
             j = jsonpickle.pickler.Pickler()
-            encoded_obj = p.encode(j.flatten(var_in))
+            encoded_obj = jsonpickle.encode(j.flatten(var_in))
             
             encoded_obj = encoded_obj.replace("'", "\\'")
             encoded_obj = encoded_obj.replace('\\"', '\\\\"')
