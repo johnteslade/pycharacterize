@@ -11,8 +11,12 @@ class ObjectCodeOutput(object):
     def output_test_code(self, object_state_list, **kwarg):
         """ Returns the code for the test harness """
 
-        return "\n".join(self.output_test_code_list(object_state_list, **kwarg))
+        out = ""
 
+        for line in self.output_test_code_list(object_state_list, **kwarg):
+            out += line.rstrip() + "\n"
+
+        return out
 
     def output_test_code_annotated(self, object_state):
         """ Returns the code for the test harness with annotations """
