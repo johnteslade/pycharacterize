@@ -35,6 +35,7 @@ class ObjectCodeOutput(object):
 
         # Define the initial code
         code_out.append("import unittest")
+        code_out.append("import jsonpickle")
         code_out.append("import {}".format(object_state_list[0].class_name.split(".")[0]))
         code_out.append("")
         code_out.append("class {}(unittest.TestCase):".format(test_case_name))
@@ -67,8 +68,6 @@ class ObjectCodeOutput(object):
         code_out = []
 
         code_out.append("""print "Starting execution of autogen test harness for {}" """.format(object_state.class_name))
-        code_out.append("")
-        code_out.append("from pycharacterize.object_factory import object_factory")
         code_out.append("")
 
         # Create obj if we have no explict __init__ call
@@ -205,14 +204,15 @@ class ObjectCodeOutput(object):
 
         else:
             # Pickle the object - set the options to intent lines
-            jsonpickle.set_encoder_options('simplejson', sort_keys=True, indent=self.INDENT_SIZE)
-            j = jsonpickle.pickler.Pickler()
-            encoded_obj = jsonpickle.encode(j.flatten(var_in))
+            #jsonpickle.set_encoder_options('simplejson', sort_keys=True, indent=self.INDENT_SIZE)
+            #j = jsonpickle.pickler.Pickler()
+            #encoded_obj = jsonpickle.encode(j.flatten(var_in))
+            encoded_obj = jsonpickle.encode(var_in)
 
             encoded_obj = encoded_obj.replace("'", "\\'")
             encoded_obj = encoded_obj.replace('\\"', '\\\\"')
 
-            return "object_factory(\"\"\"{}\"\"\")".format(encoded_obj)
+            return "jsonpickle.decode(\"\"\"{}\"\"\")".format(encoded_obj)
 
 
     def repr_encode(self, var_in):
