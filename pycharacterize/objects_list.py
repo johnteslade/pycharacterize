@@ -2,9 +2,9 @@ from object_state import ObjectState
 from object_code_output import ObjectCodeOutput
 import logging
 
-class ObjectsList():
+class ObjectsList(object):
     """ Class to hold the objects of interest as they change """
-    
+
     def __init__(self):
         """ Init """
 
@@ -19,7 +19,7 @@ class ObjectsList():
         self.class_of_interest = str(class_name)
         self.class_of_interest_ref = class_name
         self.func_names = func_names
-        
+
 
     def is_of_interest(self, class_name, class_name_ref):
         """ Is this class one being watched? """
@@ -28,7 +28,7 @@ class ObjectsList():
         # Sometimes the intested class with be prefixed with __main__ depending on the calling env
         return (self.class_of_interest != None) and (class_name == self.class_of_interest or class_name == "__main__." + self.class_of_interest or (class_name_ref == self.class_of_interest_ref))
 
-    
+
     def run_finished(self):
         """ Called when the run as finished to clean up """
 
@@ -49,7 +49,7 @@ class ObjectsList():
             if ('__init__' in self.func_names) and len(filter(lambda x: x['type'] == 'func_call' and x['func'] == "__init__", object_state.call_trace)) == 0:
                 print "Found bad test: {}".format(object_state.call_trace)
                 bad_tests.append(object_state)
-        
+
         logging.debug("Found {} bad tests".format(len(set(bad_tests))))
 
         for bad in bad_tests:
@@ -58,21 +58,21 @@ class ObjectsList():
 
     def remove_dups(self):
         """ Remove duplicates from object lists """
-        
+
         dupe_tests = []
-        
+
         for x in xrange(len(self.object_state_list)):
 
             for y in xrange(x + 1, len(self.object_state_list)):
 
                 s1 = self.object_state_list[x].call_trace
                 s2 = self.object_state_list[y].call_trace
-                
+
                 if self.equal_call_traces(s1, s2):
                     dupe_tests.append(self.object_state_list[y])
-        
+
         logging.debug("Found {} duplicate tests".format(len(set(dupe_tests))))
-                    
+
         for bad in set(dupe_tests):
             self.object_state_list.remove(bad)
 
@@ -86,17 +86,17 @@ class ObjectsList():
         if len(lhs) != len(rhs):
             return False
 
-        # Look through stacks, filter to values interested in and then compare 
+        # Look through stacks, filter to values interested in and then compare
         for x in xrange(len(lhs)):
-        
+
             lhs_filtered = filter(lambda (k, v): k in dict_keys_to_compare, lhs[x].items())
             rhs_filtered = filter(lambda (k, v): k in dict_keys_to_compare, rhs[x].items())
-            
+
             if lhs_filtered != rhs_filtered:
                 return False
-                
+
         return True
-    
+
 
     def _get_object_state(self, obj_id):
         """ Returns the object state of interest """
@@ -121,7 +121,7 @@ class ObjectsList():
 
     def function_return(self, local_vars, func_name, stack):
         """ A return from a function """
-        
+
         logging.debug("Return from {}".format(id(local_vars['self'])))
 
         self._get_object_state(id(local_vars['self'])).function_return(local_vars, func_name, stack)
@@ -139,7 +139,7 @@ class ObjectsList():
         """ Are any objects still inside a call? """
         return len( filter(lambda x: len(x.call_stack) > 0, self.object_state_list) ) > 0
 
-    
+
     def get_call_trace(self):
         """ Returns the call trace """
 

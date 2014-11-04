@@ -30,7 +30,7 @@ class Runner(bdb.Bdb):
 
     def __init__(self, completekey='tab', skip=None, step_all=False):
         bdb.Bdb.__init__(self, skip=skip)
-        
+
         self._wait_for_mainpyfile = 0
 
         self.step_all = step_all # Should we step through all execution
@@ -42,7 +42,7 @@ class Runner(bdb.Bdb):
         self.objects_list = ObjectsList() # List of objects
 
         self.filename_of_interest = None # The filename we are looking for
-        
+
         self.calltrace_only = False # Are we only doing a call trace?
 
         # Reset all vars
@@ -64,7 +64,7 @@ class Runner(bdb.Bdb):
         # locals whenever the .f_locals accessor is called, so we
         # cache it here to ensure that modifications are not overwritten.
         self.curframe_locals = self.curframe.f_locals
-        
+
 
     def do_runcall(self, *args, **kwds):
         """ Makes the function call """
@@ -76,7 +76,7 @@ class Runner(bdb.Bdb):
             logging.debug("Caller raised SystemExit")
         finally:
             # Clear breaks
-            # This appears to be a bug in bdb - if they are not cleared they are still active in 
+            # This appears to be a bug in bdb - if they are not cleared they are still active in
             # the next instance of BDB
             self.clear_all_breaks()
 
@@ -97,7 +97,7 @@ class Runner(bdb.Bdb):
             logging.debug("Caller raised SystemExit")
         finally:
             # Clear breaks
-            # This appears to be a bug in bdb - if they are not cleared they are still active in 
+            # This appears to be a bug in bdb - if they are not cleared they are still active in
             # the next instance of BDB
             self.clear_all_breaks()
 
@@ -106,17 +106,17 @@ class Runner(bdb.Bdb):
         """ Prints out the call trace - as created by do_calltrace """
 
         calls_made = self.all_calls.items()
-        
+
         for (class_called, funcs) in calls_made:
 
             print "Class {}".format(class_called)
 
             for (func, calls) in funcs.items():
 
-                print "  {}() - {} calls".format(func, calls)   
-           
+                print "  {}() - {} calls".format(func, calls)
+
             print
-        
+
 
     # Override Bdb methods
 
@@ -170,13 +170,13 @@ class Runner(bdb.Bdb):
         # Get list of class functions and set breakpoints
         class_functions = self.find_class_functions(class_name)
         self.filename_of_interest = class_functions[0]['filename']
-        
+
         if not self.step_all:
             self.set_breakpoints(class_functions)
 
         # Save the class details
         self.objects_list.set_class_to_watch(class_name_str, [ func['name'] for func in class_functions ])
-        
+
         print "Breaks = {}".format(self.get_all_breaks())
 
 
@@ -186,7 +186,7 @@ class Runner(bdb.Bdb):
         for funcs in class_functions:
 
             err = self.set_break(funcs['filename'], funcs['line'], False, None, funcs['name'])
-            if err: 
+            if err:
                 print '***', err
             else:
                 bp = self.get_breaks(funcs['filename'], funcs['line'])[-1]
@@ -218,19 +218,19 @@ class Runner(bdb.Bdb):
 
         self.setup(frame, traceback)
         #self.print_stack_entry(self.stack[self.curindex])
-       
+
         #logging.debug("Class = {}, Func = {}, call = {}, return = {}".format("", self.stack[self.curindex][0].f_code.co_name, func_call, func_return))
 
-        (args, varargs, keywords, local_vars) = inspect.getargvalues(frame)  
+        (args, varargs, keywords, local_vars) = inspect.getargvalues(frame)
         #print "a = {}".format(args)
         #print "v = {}".format(varargs)
         #print "k = {}".format(keywords)
         #print "l = {}".format(local_vars)
-       
+
         # Look for the class
         if 'self' in local_vars:
-       
-            class_name = local_vars['self'].__class__.__module__ + "." + local_vars['self'].__class__.__name__ 
+
+            class_name = local_vars['self'].__class__.__module__ + "." + local_vars['self'].__class__.__name__
 
             #logging.debug("Mod = {}, Class = {}".format(local_vars['self'].__class__.__module__, local_vars['self'].__class__.__name__))
 
@@ -241,18 +241,18 @@ class Runner(bdb.Bdb):
                 self.all_calls[class_name][self.stack[self.curindex][0].f_code.co_name] += 1
                 self.class_counts[class_name] += 1
 
-            # Class we are interested in? 
+            # Class we are interested in?
             if not self.calltrace_only and self.objects_list.is_of_interest(class_name, local_vars['self'].__class__):
-            
+
                 logging.debug("Of interest --- Class = {}, Func = {}, call = {}, return = {}".format(class_name, self.stack[self.curindex][0].f_code.co_name, func_call, func_return))
-            
+
                 if func_call:
                     self.objects_list.function_call(local_vars, self.stack[self.curindex][0].f_code.co_name)
 
                 # Save the details of the function call
                 if func_return:
                     self.objects_list.function_return(local_vars, self.stack[self.curindex][0].f_code.co_name, self.stack)
-                 
+
 
         #logging.debug("")
         #logging.debug("--------------")
@@ -270,18 +270,18 @@ class Runner(bdb.Bdb):
 
         self.forget()
 
-    
+
     def output_test_code(self, **kwargs):
         """ Output the test code """
 
         return self.objects_list.output_test_code(**kwargs)
- 
+
 
     def output_test_code_annotated(self, **kwargs):
 
         return self.objects_list.output_test_code_annotated(**kwargs)
-    
- 
+
+
     def output_test_code_to_file(self, filename, **kwargs):
 
         fw = open(filename, 'w')
