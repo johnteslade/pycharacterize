@@ -152,7 +152,7 @@ class ObjectCodeOutput(object):
             return "None"
 
         # Basic type
-        if (var_in == None) or (type(var_in) in [bool, int]):
+        if (var_in is None) or (type(var_in) in [bool, int]):
             return "{}".format(var_in)
         # String (special behaviour to escape)
         elif type(var_in) == str:
